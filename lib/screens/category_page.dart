@@ -4,6 +4,13 @@ import 'package:provider/provider.dart';
 
 import '../config/category.dart';
 import '../provider/user_pin_provider.dart';
+import '../provider/theme_provider.dart';
+import '../config/app_theme.dart';
+import '../widgets/theme_toggle_button.dart';
+import '../widgets/particle_system.dart';
+import '../widgets/dynamic_background.dart';
+import '../widgets/glassmorphic_card.dart';
+import '../widgets/hover_effects.dart';
 import '../utils/logout_util.dart';
 
 import 'all_maths_page.dart';
@@ -93,218 +100,230 @@ class _CategoryPageState extends State<CategoryPage>
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            }
-          },
-        ),
-        title: Text(
-          "Welcome to Math World",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            shadows: const [
-              Shadow(
-                color: Colors.black38,
-                offset: Offset(2, 2),
-                blurRadius: 4,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final colors =
+            themeProvider.isDarkMode ? AppColors.dark : AppColors.light;
+
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: Text(
+              "Welcome to Math World",
+              style: TextStyle(
+                color: colors.primaryText,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    color: colors.primaryText.withOpacity(0.3),
+                    offset: Offset(2, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+            centerTitle: true,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: FloatingThemeToggle(),
               ),
             ],
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/background.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(
-                          0.3 + 0.2 * sin(_controller.value * 2 * pi)),
-                      Colors.white.withOpacity(0.6),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              );
-            },
-          ),
-          // Floating symbols
-          ..._buildFloatingSymbols(screenWidth, screenHeight),
-          // Main content
-          SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // PIN badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.03,
-                      vertical: screenHeight * 0.008),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.orange, Colors.deepOrangeAccent],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
+          body: Stack(
+            children: [
+              // Dynamic gradient background
+              DynamicBackground(
+                isDarkMode: themeProvider.isDarkMode,
+                gradientColors: colors.backgroundGradient,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+
+              // Particle system
+              ParticleSystem(
+                isDarkMode: themeProvider.isDarkMode,
+                colors: colors.floatingElements,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          colors.cardBackground.withOpacity(
+                              0.3 + 0.2 * sin(_controller.value * 2 * pi)),
+                          colors.cardBackground.withOpacity(0.6),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ],
-                  ),
-                  child: Text(
-                    'PIN: $pin',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.05),
-                
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: categories.map((cat) {
-                      final subtitle = _subtitleFor(cat.title);
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                          child: InkWell(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => cat.page),
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Ink(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.white.withOpacity(0.85),
-                                    Colors.white.withOpacity(0.95),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 6,
-                                    offset: Offset(3, 3),
-                                  ),
-                                ],
-                                border: Border.all(
-                                  color: Colors.yellowAccent,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: 1,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.asset(
-                                        cat.assetPath,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    cat.title,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.deepPurple,
-                                      shadows: const [
-                                        Shadow(
-                                          color: Colors.black26,
-                                          offset: Offset(1, 1),
-                                          blurRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    subtitle,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
-                              ),
-                            ),
-                          ),
+                  );
+                },
+              ),
+              // Floating symbols
+              ..._buildFloatingSymbols(screenWidth, screenHeight, colors),
+              // Main content
+              SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // PIN badge
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03,
+                          vertical: screenHeight * 0.008),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.floatingElements[0],
+                            colors.floatingElements[1],
+                          ],
                         ),
-                      );
-                    }).toList(),
-                  ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.cardShadow,
+                            blurRadius: 4,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'PIN: $pin',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.05),
+
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: categories.map((cat) {
+                          final subtitle = _subtitleFor(cat.title);
+                          return Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6.0),
+                              child: HoverCard(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => cat.page),
+                                ),
+                                hoverScale: 1.03,
+                                hoverElevation: 12.0,
+                                hoverGlowColor: colors.floatingElements[2],
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        colors.cardBackground.withOpacity(0.85),
+                                        colors.cardBackground.withOpacity(0.95),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: colors.floatingElements[2],
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      AspectRatio(
+                                        aspectRatio: 1,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Image.asset(
+                                            cat.assetPath,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        cat.title,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: colors.accentText,
+                                          shadows: [
+                                            Shadow(
+                                              color: colors.cardShadow,
+                                              offset: Offset(1, 1),
+                                              blurRadius: 2,
+                                            ),
+                                          ],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        subtitle,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: colors.secondaryText,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'logoutCategory',
-        onPressed: () => logout(context),
-        backgroundColor: Colors.redAccent,
-        child: const Icon(Icons.logout_rounded, color: Colors.white),
-      ),
+          floatingActionButton: GlassmorphicFAB(
+            isDarkMode: themeProvider.isDarkMode,
+            onPressed: () => logout(context),
+            child: const Icon(Icons.logout_rounded, color: Colors.white),
+          ),
+        );
+      },
     );
   }
 
-  List<Widget> _buildFloatingSymbols(double width, double height) {
+  List<Widget> _buildFloatingSymbols(
+      double width, double height, AppColorScheme colors) {
     List<Widget> symbols = [];
     for (int i = 0; i < 6; i++) {
       symbols.add(
         AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            double top = (height * 0.1 + i * 50 +
+            double top = (height * 0.1 +
+                    i * 50 +
                     20 * sin(_controller.value * 2 * pi + i)) %
                 height;
-            double left = (width * 0.1 + i * 60 +
+            double left = (width * 0.1 +
+                    i * 60 +
                     30 * cos(_controller.value * 2 * pi + i)) %
                 width;
             return Positioned(
@@ -312,7 +331,9 @@ class _CategoryPageState extends State<CategoryPage>
               left: left,
               child: Icon(
                 i % 2 == 0 ? Icons.star : Icons.circle,
-                color: Colors.white24,
+                color: colors
+                    .floatingElements[i % colors.floatingElements.length]
+                    .withOpacity(0.6),
                 size: 40,
               ),
             );
