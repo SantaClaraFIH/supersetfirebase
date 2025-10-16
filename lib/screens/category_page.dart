@@ -9,14 +9,12 @@ import '../config/app_theme.dart';
 import '../widgets/theme_toggle_button.dart';
 import '../widgets/particle_system.dart';
 import '../widgets/dynamic_background.dart';
-import '../widgets/glassmorphic_card.dart';
 import '../widgets/hover_effects.dart';
 import '../utils/logout_util.dart';
 
 import 'all_maths_page.dart';
 import 'kids_page.dart';
 import 'teens_page.dart';
-import '../screens/login_screen.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({Key? key}) : super(key: key);
@@ -35,13 +33,24 @@ class _CategoryPageState extends State<CategoryPage>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 20),
-    )..repeat();
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Start animation after the widget is fully initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_controller.isAnimating) {
+        _controller.repeat();
+      }
+    });
   }
 
   String _subtitleFor(String title) {
@@ -111,28 +120,251 @@ class _CategoryPageState extends State<CategoryPage>
             backgroundColor: Colors.transparent,
             elevation: 0,
             automaticallyImplyLeading: false,
-            title: Text(
-              "Welcome to Math World",
-              style: TextStyle(
-                color: colors.primaryText,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: colors.primaryText.withOpacity(0.3),
-                    offset: Offset(2, 2),
-                    blurRadius: 4,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colors.cardBackground.withOpacity(0.1),
+                    colors.cardBackground.withOpacity(0.05),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.7, 1.0],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: colors.floatingElements[0].withOpacity(0.1),
+                    width: 1,
                   ),
-                ],
+                ),
+              ),
+              child: SafeArea(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.cardBackground.withOpacity(0.8),
+                        colors.cardBackground.withOpacity(0.6),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: colors.floatingElements[0].withOpacity(0.2),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.cardShadow.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: colors.floatingElements[0].withOpacity(0.05),
+                        blurRadius: 40,
+                        offset: const Offset(0, 16),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left side: Premium logo and branding
+                      Row(
+                        children: [
+                          // Premium logo with glow effect
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  colors.floatingElements[0],
+                                  colors.floatingElements[1],
+                                  colors.floatingElements[2],
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.floatingElements[0]
+                                      .withOpacity(0.4),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                  spreadRadius: 0,
+                                ),
+                                BoxShadow(
+                                  color: colors.floatingElements[1]
+                                      .withOpacity(0.2),
+                                  blurRadius: 32,
+                                  offset: const Offset(0, 8),
+                                  spreadRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
+                                'assets/images/spiderman.png',
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          // Premium typography
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Math World',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  color: colors.primaryText,
+                                  letterSpacing: -0.5,
+                                  height: 1.1,
+                                  shadows: [
+                                    Shadow(
+                                      color:
+                                          colors.primaryText.withOpacity(0.1),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      // Right side: Premium controls
+                      Row(
+                        children: [
+                          // Premium PIN badge
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.orange.withOpacity(0.9),
+                                  Colors.deepOrange.withOpacity(0.9),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                  spreadRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.security_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'PIN: $pin',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          // Theme toggle
+                          FloatingThemeToggle(),
+                          SizedBox(width: 16),
+                          // Logout button
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.red.withOpacity(0.9),
+                                  Colors.redAccent.withOpacity(0.9),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                  spreadRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () => logout(context),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.logout_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Logout',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            centerTitle: true,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: FloatingThemeToggle(),
-              ),
-            ],
+            toolbarHeight: 140,
           ),
           body: Stack(
             children: [
@@ -172,138 +404,200 @@ class _CategoryPageState extends State<CategoryPage>
               ),
               // Floating symbols
               ..._buildFloatingSymbols(screenWidth, screenHeight, colors),
-              // Main content
+
+              // Main content with proper scrollable layout
               SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // PIN badge
-                    Container(
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: screenHeight - 100, // Account for app bar
+                    ),
+                    child: Padding(
                       padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.03,
-                          vertical: screenHeight * 0.008),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colors.floatingElements[0],
-                            colors.floatingElements[1],
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colors.cardShadow,
-                            blurRadius: 4,
-                            offset: Offset(2, 2),
+                        horizontal: screenWidth * 0.04,
+                        vertical: screenHeight * 0.02,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Reduced spacing to move tiles up
+                          SizedBox(height: screenHeight * 0.05),
+
+                          // Responsive Category Cards
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isMobile = constraints.maxWidth < 800;
+                              final cardSpacing = isMobile ? 16.0 : 20.0;
+
+                              return Column(
+                                children: [
+                                  // Responsive grid layout for all screen sizes
+                                  LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final screenWidth = constraints.maxWidth;
+                                      final crossAxisCount = screenWidth < 600
+                                          ? 1
+                                          : screenWidth < 900
+                                              ? 2
+                                              : 3;
+                                      final childAspectRatio =
+                                          screenWidth < 600 ? 1.0 : 0.8;
+
+                                      return GridView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: crossAxisCount,
+                                          childAspectRatio: childAspectRatio,
+                                          crossAxisSpacing: cardSpacing,
+                                          mainAxisSpacing: cardSpacing,
+                                        ),
+                                        itemCount: categories.length,
+                                        itemBuilder: (context, index) {
+                                          final cat = categories[index];
+                                          final subtitle =
+                                              _subtitleFor(cat.title);
+
+                                          return HoverCard(
+                                            onTap: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (_) => cat.page),
+                                            ),
+                                            hoverScale: 1.05,
+                                            hoverElevation: 20.0,
+                                            hoverGlowColor:
+                                                colors.floatingElements[2],
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    colors.cardBackground
+                                                        .withOpacity(0.85),
+                                                    colors.cardBackground
+                                                        .withOpacity(0.95),
+                                                  ],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                border: Border.all(
+                                                  color: colors
+                                                      .floatingElements[2],
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  // Image section - Full width
+                                                  Expanded(
+                                                    flex: 3,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(14),
+                                                        topRight:
+                                                            Radius.circular(14),
+                                                      ),
+                                                      child: Image.asset(
+                                                        cat.assetPath,
+                                                        fit: BoxFit.cover,
+                                                        width: double.infinity,
+                                                        height: double.infinity,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Content section - Below image
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(12),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Flexible(
+                                                            child: Text(
+                                                              cat.title,
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize:
+                                                                    screenWidth <
+                                                                            600
+                                                                        ? 16
+                                                                        : 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: colors
+                                                                    .accentText,
+                                                              ),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 4),
+                                                          Flexible(
+                                                            child: Text(
+                                                              subtitle,
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              softWrap: false,
+                                                              style: TextStyle(
+                                                                fontSize:
+                                                                    screenWidth <
+                                                                            600
+                                                                        ? 12
+                                                                        : 14,
+                                                                color: colors
+                                                                    .secondaryText,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic,
+                                                              ),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           ),
+
+                          // Bottom spacing
+                          SizedBox(height: screenHeight * 0.05),
                         ],
                       ),
-                      child: Text(
-                        'PIN: $pin',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
-                    SizedBox(height: screenHeight * 0.05),
-
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: categories.map((cat) {
-                          final subtitle = _subtitleFor(cat.title);
-                          return Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 6.0),
-                              child: HoverCard(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => cat.page),
-                                ),
-                                hoverScale: 1.03,
-                                hoverElevation: 12.0,
-                                hoverGlowColor: colors.floatingElements[2],
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        colors.cardBackground.withOpacity(0.85),
-                                        colors.cardBackground.withOpacity(0.95),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: colors.floatingElements[2],
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      AspectRatio(
-                                        aspectRatio: 1,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: Image.asset(
-                                            cat.assetPath,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        cat.title,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: colors.accentText,
-                                          shadows: [
-                                            Shadow(
-                                              color: colors.cardShadow,
-                                              offset: Offset(1, 1),
-                                              blurRadius: 2,
-                                            ),
-                                          ],
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        subtitle,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: colors.secondaryText,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 8),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
-          ),
-          floatingActionButton: GlassmorphicFAB(
-            isDarkMode: themeProvider.isDarkMode,
-            onPressed: () => logout(context),
-            child: const Icon(Icons.logout_rounded, color: Colors.white),
           ),
         );
       },

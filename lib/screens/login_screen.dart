@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen>
     _bounceController = AnimationController(
       duration: Duration(milliseconds: 1500),
       vsync: this,
-    )..repeat(reverse: true);
+    );
 
     _bounceAnimation = Tween<double>(
       begin: -10.0,
@@ -46,6 +46,17 @@ class _LoginScreenState extends State<LoginScreen>
       parent: _bounceController,
       curve: Curves.easeInOut,
     ));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Start animation after the widget is fully initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _bounceController.repeat(reverse: true);
+      }
+    });
   }
 
   @override
