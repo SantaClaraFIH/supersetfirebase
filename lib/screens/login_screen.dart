@@ -10,6 +10,7 @@ import 'package:supersetfirebase/widgets/particle_system.dart';
 import 'package:supersetfirebase/widgets/dynamic_background.dart';
 import 'package:supersetfirebase/widgets/glassmorphic_card.dart';
 import 'package:supersetfirebase/widgets/hover_effects.dart';
+import 'package:supersetfirebase/widgets/toast_bar.dart';
 import 'package:supersetfirebase/screens/category_page.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -125,25 +126,25 @@ class _LoginScreenState extends State<LoginScreen>
       Provider.of<UserPinProvider>(context, listen: false).setPin(pin);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Text('Welcome back!'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
+        // Show themed toast
+        showToast(
+          context: context,
+          kind: ToastKind.success,
+          title: 'Welcome back!',
+          message: 'You\'re signed in. Pick a category to continue.',
+          autoCloseMs: 4000,
         );
 
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => CategoryPage(),
-          ),
-        );
+        // Navigate after a short delay to let toast appear
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => CategoryPage(),
+              ),
+            );
+          }
+        });
       }
     } catch (e) {
       setState(() {
