@@ -1,0 +1,38 @@
+name: Deploy Staging on dev
+on:
+    push:
+        branches: [dev]
+
+jobs:
+    staging:
+        runs-on: ubuntu-latest
+        concurrency:
+            group: staging-dev
+            cancel-in-progress: true
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 17
+
+            - uses: subosito/flutter-action@v2
+              with:
+                  channel: stable
+                  cache: true
+
+            - name: flutter pub get
+              run: flutter pub get
+
+            - name: Build Flutter Web
+              run: flutter build web --release --no-tree-shake-icons
+
+            - name: Deploy to Firebase Hosting (staging)
+              uses: FirebaseExtended/action-hosting-deploy@v0
+              with:
+                  repoToken: ${{ secrets.GITHUB_TOKEN }}
+                  firebaseServiceAccount: ${{ secrets.firebaseservice_accountkey}}
+                  projectId: fih-superset-dev
+                  channelId: staging # persistent test URL
+                  entryPoint: .
