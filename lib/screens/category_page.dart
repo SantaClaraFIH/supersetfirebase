@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/category.dart';
-import '../provider/user_pin_provider.dart';
 import '../provider/theme_provider.dart';
 import '../config/app_theme.dart';
-import '../widgets/theme_toggle_button.dart';
+import '../widgets/top_bar.dart';
 import '../widgets/particle_system.dart';
 import '../widgets/dynamic_background.dart';
 import '../widgets/hover_effects.dart';
-import '../utils/logout_util.dart';
 
 import 'all_maths_page.dart';
 import 'kids_page.dart';
@@ -68,8 +66,6 @@ class _CategoryPageState extends State<CategoryPage>
 
   @override
   Widget build(BuildContext context) {
-    final pin = Provider.of<UserPinProvider>(context, listen: false).pin;
-
     final categories = <Category>[
       Category(
         title: 'All Maths',
@@ -116,256 +112,7 @@ class _CategoryPageState extends State<CategoryPage>
 
         return Scaffold(
           extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    colors.cardBackground.withOpacity(0.1),
-                    colors.cardBackground.withOpacity(0.05),
-                    Colors.transparent,
-                  ],
-                  stops: [0.0, 0.7, 1.0],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                border: Border(
-                  bottom: BorderSide(
-                    color: colors.floatingElements[0].withOpacity(0.1),
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.cardBackground.withOpacity(0.8),
-                        colors.cardBackground.withOpacity(0.6),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: colors.floatingElements[0].withOpacity(0.2),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.cardShadow.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                        spreadRadius: 0,
-                      ),
-                      BoxShadow(
-                        color: colors.floatingElements[0].withOpacity(0.05),
-                        blurRadius: 40,
-                        offset: const Offset(0, 16),
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Left side: Premium logo and branding
-                      Row(
-                        children: [
-                          // Premium logo with glow effect
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  colors.floatingElements[0],
-                                  colors.floatingElements[1],
-                                  colors.floatingElements[2],
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.floatingElements[0]
-                                      .withOpacity(0.4),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                  spreadRadius: 0,
-                                ),
-                                BoxShadow(
-                                  color: colors.floatingElements[1]
-                                      .withOpacity(0.2),
-                                  blurRadius: 32,
-                                  offset: const Offset(0, 8),
-                                  spreadRadius: 0,
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                'assets/images/spiderman.png',
-                                width: 32,
-                                height: 32,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          // Premium typography
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Math World',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w900,
-                                  color: colors.primaryText,
-                                  letterSpacing: -0.5,
-                                  height: 1.1,
-                                  shadows: [
-                                    Shadow(
-                                      color:
-                                          colors.primaryText.withOpacity(0.1),
-                                      offset: const Offset(0, 2),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      // Right side: Premium controls
-                      Row(
-                        children: [
-                          // Premium PIN badge
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.orange.withOpacity(0.9),
-                                  Colors.deepOrange.withOpacity(0.9),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.orange.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                  spreadRadius: 0,
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.security_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'PIN: $pin',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          // Theme toggle
-                          FloatingThemeToggle(),
-                          SizedBox(width: 16),
-                          // Logout button
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.red.withOpacity(0.9),
-                                  Colors.redAccent.withOpacity(0.9),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.red.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                  spreadRadius: 0,
-                                ),
-                              ],
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () => logout(context),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.logout_rounded,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Logout',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            toolbarHeight: 140,
-          ),
+          appBar: TopBar(title: 'Math World'),
           body: Stack(
             children: [
               // Dynamic gradient background
@@ -492,22 +239,42 @@ class _CategoryPageState extends State<CategoryPage>
                                               ),
                                               child: Column(
                                                 children: [
-                                                  // Image section - Full width
+                                                  // Image section - Full width with contain
                                                   Expanded(
                                                     flex: 3,
-                                                    child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                        topLeft:
-                                                            Radius.circular(14),
-                                                        topRight:
-                                                            Radius.circular(14),
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  14),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  14),
+                                                        ),
+                                                        color: colors
+                                                            .cardBackground
+                                                            .withOpacity(0.3),
                                                       ),
-                                                      child: Image.asset(
-                                                        cat.assetPath,
-                                                        fit: BoxFit.cover,
-                                                        width: double.infinity,
-                                                        height: double.infinity,
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  14),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  14),
+                                                        ),
+                                                        child: Image.asset(
+                                                          cat.assetPath,
+                                                          fit: BoxFit.contain,
+                                                          width:
+                                                              double.infinity,
+                                                          height:
+                                                              double.infinity,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),

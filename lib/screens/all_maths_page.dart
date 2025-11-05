@@ -1,15 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../provider/user_pin_provider.dart';
 import '../provider/theme_provider.dart';
 import '../config/app_theme.dart';
-import '../widgets/theme_toggle_button.dart';
 import '../widgets/particle_system.dart';
 import '../widgets/dynamic_background.dart';
-import '../widgets/glassmorphic_card.dart';
-import '../widgets/hover_effects.dart';
-import '../utils/logout_util.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/game_card.dart';
+import '../widgets/card_grid.dart';
 import '../gamescreen/mathmingle/main.dart' show MathMingleApp;
 
 class AllMathsPage extends StatefulWidget {
@@ -40,48 +38,36 @@ class _AllMathsPageState extends State<AllMathsPage>
 
   @override
   Widget build(BuildContext context) {
-    final pin = Provider.of<UserPinProvider>(context, listen: false).pin;
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    final games = [
-      {
-        'image': 'assets/images/math_mingle.png',
-        'title': 'Math Mingle',
-        'desc': 'Fun with numbers!',
-        'widget': MathMingleApp(),
-      },
-    ];
 
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         final colors =
             themeProvider.isDarkMode ? AppColors.dark : AppColors.light;
 
+        // Game cards data
+        final games = [
+          {
+            'title': 'Math Mingle',
+            'subtitle': 'Fun with numbers!',
+            'image': 'assets/images/math_mingle.png',
+            'onTap': () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MathMingleApp(),
+                ),
+              );
+            },
+          },
+        ];
+
         return Scaffold(
           extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: colors.primaryText),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              'All Maths',
-              style: TextStyle(
-                color: colors.primaryText,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-            centerTitle: true,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: FloatingThemeToggle(),
-              ),
-            ],
+          appBar: TopBar(
+            title: 'All Maths',
+            showBackButton: true,
           ),
           body: Stack(
             children: [
@@ -121,158 +107,26 @@ class _AllMathsPageState extends State<AllMathsPage>
               ),
 
               SafeArea(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    _PinBadge(pin: pin, colors: colors),
-                    SizedBox(height: screenHeight * 0.05),
-
-                    // Games section
-                    Expanded(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: games.map((game) {
-                              double cardWidth = min(screenWidth * 0.7, 300);
-                              double cardHeight = screenHeight * 0.55;
-
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 12),
-                                child: HoverCard(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            game['widget'] as Widget,
-                                      ),
-                                    );
-                                  },
-                                  hoverScale: 1.05,
-                                  hoverElevation: 16.0,
-                                  hoverGlowColor: colors.accentText,
-                                  child: SizedBox(
-                                    width: cardWidth,
-                                    height: cardHeight,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        // Image card
-                                        Expanded(
-                                          flex: 7,
-                                          child: GlassmorphicCard(
-                                            isDarkMode:
-                                                themeProvider.isDarkMode,
-                                            borderRadius: 16,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              child: Image.asset(
-                                                game['image'] as String,
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-
-                                        const SizedBox(height: 12),
-
-                                        // Content BELOW the image
-                                        Expanded(
-                                          flex: 3,
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                game['title'] as String,
-                                                style: TextStyle(
-                                                  fontSize: 22,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: colors.accentText,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                game['desc'] as String,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: colors.secondaryText,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-                  ],
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: CardGrid(
+                    children: games.map((game) {
+                      return GameCard(
+                        title: game['title'] as String,
+                        subtitle: game['subtitle'] as String,
+                        imageSrc: game['image'] as String,
+                        onClick: game['onTap'] as VoidCallback,
+                        colors: colors,
+                        isDarkMode: themeProvider.isDarkMode,
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ],
           ),
-          floatingActionButton: GlassmorphicFAB(
-            isDarkMode: themeProvider.isDarkMode,
-            onPressed: () => logout(context),
-            child: const Icon(Icons.logout_rounded, color: Colors.white),
-          ),
         );
       },
-    );
-  }
-}
-
-// Theme-aware PIN badge
-class _PinBadge extends StatelessWidget {
-  final String pin;
-  final AppColorScheme colors;
-
-  const _PinBadge({required this.pin, required this.colors});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: colors.floatingElements.take(2).toList(),
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: colors.cardShadow,
-            blurRadius: 8,
-            offset: const Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        'PIN: $pin',
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          letterSpacing: 1.2,
-        ),
-      ),
     );
   }
 }
