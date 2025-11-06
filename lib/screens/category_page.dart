@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/category.dart';
-import '../provider/user_pin_provider.dart';
-import '../utils/logout_util.dart';
+import '../provider/theme_provider.dart';
+import '../config/app_theme.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/particle_system.dart';
+import '../widgets/dynamic_background.dart';
+import '../widgets/hover_effects.dart';
 
 import 'all_maths_page.dart';
 import 'kids_page.dart';
 import 'teens_page.dart';
-import '../screens/login_screen.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({Key? key}) : super(key: key);
@@ -28,13 +31,24 @@ class _CategoryPageState extends State<CategoryPage>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 20),
-    )..repeat();
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Start animation after the widget is fully initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_controller.isAnimating) {
+        _controller.repeat();
+      }
+    });
   }
 
   String _subtitleFor(String title) {
@@ -52,8 +66,6 @@ class _CategoryPageState extends State<CategoryPage>
 
   @override
   Widget build(BuildContext context) {
-    final pin = Provider.of<UserPinProvider>(context, listen: false).pin;
-
     final categories = <Category>[
       Category(
         title: 'All Maths',
@@ -93,218 +105,286 @@ class _CategoryPageState extends State<CategoryPage>
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            }
-          },
-        ),
-        title: Text(
-          "Welcome to Math World",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            shadows: const [
-              Shadow(
-                color: Colors.black38,
-                offset: Offset(2, 2),
-                blurRadius: 4,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final colors =
+            themeProvider.isDarkMode ? AppColors.dark : AppColors.light;
+
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: TopBar(title: 'Math World'),
+          body: Stack(
+            children: [
+              // Dynamic gradient background
+              DynamicBackground(
+                isDarkMode: themeProvider.isDarkMode,
+                gradientColors: colors.backgroundGradient,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+
+              // Particle system
+              ParticleSystem(
+                isDarkMode: themeProvider.isDarkMode,
+                colors: colors.floatingElements,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          colors.cardBackground.withOpacity(
+                              0.3 + 0.2 * sin(_controller.value * 2 * pi)),
+                          colors.cardBackground.withOpacity(0.6),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              // Floating symbols
+              ..._buildFloatingSymbols(screenWidth, screenHeight, colors),
+
+              // Main content with proper scrollable layout
+              SafeArea(
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: screenHeight - 100, // Account for app bar
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.04,
+                        vertical: screenHeight * 0.02,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Reduced spacing to move tiles up
+                          SizedBox(height: screenHeight * 0.05),
+
+                          // Responsive Category Cards
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isMobile = constraints.maxWidth < 800;
+                              final cardSpacing = isMobile ? 16.0 : 20.0;
+
+                              return Column(
+                                children: [
+                                  // Responsive grid layout for all screen sizes
+                                  LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final screenWidth = constraints.maxWidth;
+                                      final crossAxisCount = screenWidth < 600
+                                          ? 1
+                                          : screenWidth < 900
+                                              ? 2
+                                              : 3;
+                                      final childAspectRatio =
+                                          screenWidth < 600 ? 1.0 : 0.8;
+
+                                      return GridView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: crossAxisCount,
+                                          childAspectRatio: childAspectRatio,
+                                          crossAxisSpacing: cardSpacing,
+                                          mainAxisSpacing: cardSpacing,
+                                        ),
+                                        itemCount: categories.length,
+                                        itemBuilder: (context, index) {
+                                          final cat = categories[index];
+                                          final subtitle =
+                                              _subtitleFor(cat.title);
+
+                                          return HoverCard(
+                                            onTap: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (_) => cat.page),
+                                            ),
+                                            hoverScale: 1.05,
+                                            hoverElevation: 20.0,
+                                            hoverGlowColor:
+                                                colors.floatingElements[2],
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    colors.cardBackground
+                                                        .withOpacity(0.85),
+                                                    colors.cardBackground
+                                                        .withOpacity(0.95),
+                                                  ],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                border: Border.all(
+                                                  color: colors
+                                                      .floatingElements[2],
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  // Image section - Full width with contain
+                                                  Expanded(
+                                                    flex: 3,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  14),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  14),
+                                                        ),
+                                                        color: colors
+                                                            .cardBackground
+                                                            .withOpacity(0.3),
+                                                      ),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  14),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  14),
+                                                        ),
+                                                        child: Image.asset(
+                                                          cat.assetPath,
+                                                          fit: BoxFit.contain,
+                                                          width:
+                                                              double.infinity,
+                                                          height:
+                                                              double.infinity,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Content section - Below image
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(12),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Flexible(
+                                                            child: Text(
+                                                              cat.title,
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize:
+                                                                    screenWidth <
+                                                                            600
+                                                                        ? 16
+                                                                        : 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: colors
+                                                                    .accentText,
+                                                              ),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 4),
+                                                          Flexible(
+                                                            child: Text(
+                                                              subtitle,
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              softWrap: false,
+                                                              style: TextStyle(
+                                                                fontSize:
+                                                                    screenWidth <
+                                                                            600
+                                                                        ? 12
+                                                                        : 14,
+                                                                color: colors
+                                                                    .secondaryText,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic,
+                                                              ),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+
+                          // Bottom spacing
+                          SizedBox(height: screenHeight * 0.05),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/background.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(
-                          0.3 + 0.2 * sin(_controller.value * 2 * pi)),
-                      Colors.white.withOpacity(0.6),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              );
-            },
-          ),
-          // Floating symbols
-          ..._buildFloatingSymbols(screenWidth, screenHeight),
-          // Main content
-          SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // PIN badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.03,
-                      vertical: screenHeight * 0.008),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.orange, Colors.deepOrangeAccent],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    'PIN: $pin',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.05),
-                
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: categories.map((cat) {
-                      final subtitle = _subtitleFor(cat.title);
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                          child: InkWell(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => cat.page),
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Ink(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.white.withOpacity(0.85),
-                                    Colors.white.withOpacity(0.95),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 6,
-                                    offset: Offset(3, 3),
-                                  ),
-                                ],
-                                border: Border.all(
-                                  color: Colors.yellowAccent,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: 1,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.asset(
-                                        cat.assetPath,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    cat.title,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.deepPurple,
-                                      shadows: const [
-                                        Shadow(
-                                          color: Colors.black26,
-                                          offset: Offset(1, 1),
-                                          blurRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    subtitle,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'logoutCategory',
-        onPressed: () => logout(context),
-        backgroundColor: Colors.redAccent,
-        child: const Icon(Icons.logout_rounded, color: Colors.white),
-      ),
+        );
+      },
     );
   }
 
-  List<Widget> _buildFloatingSymbols(double width, double height) {
+  List<Widget> _buildFloatingSymbols(
+      double width, double height, AppColorScheme colors) {
     List<Widget> symbols = [];
     for (int i = 0; i < 6; i++) {
       symbols.add(
         AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            double top = (height * 0.1 + i * 50 +
+            double top = (height * 0.1 +
+                    i * 50 +
                     20 * sin(_controller.value * 2 * pi + i)) %
                 height;
-            double left = (width * 0.1 + i * 60 +
+            double left = (width * 0.1 +
+                    i * 60 +
                     30 * cos(_controller.value * 2 * pi + i)) %
                 width;
             return Positioned(
@@ -312,7 +392,9 @@ class _CategoryPageState extends State<CategoryPage>
               left: left,
               child: Icon(
                 i % 2 == 0 ? Icons.star : Icons.circle,
-                color: Colors.white24,
+                color: colors
+                    .floatingElements[i % colors.floatingElements.length]
+                    .withOpacity(0.6),
                 size: 40,
               ),
             );
