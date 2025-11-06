@@ -1,7 +1,9 @@
 name: Preview Hosting on PR to dev
+
 on:
     pull_request:
-        branches: [dev] # PRs into dev
+        branches: [dev]
+
 permissions:
     contents: read
     pull-requests: write
@@ -14,6 +16,7 @@ jobs:
         concurrency:
             group: preview-${{ github.event.pull_request.number }}
             cancel-in-progress: true
+
         steps:
             - uses: actions/checkout@v4
 
@@ -33,11 +36,22 @@ jobs:
             - name: Build Flutter Web
               run: flutter build web --release --no-tree-shake-icons
 
-            - name: Deploy preview channel
+            - name: Upload built web (artifact)
+              uses: actions/upload-artifact@v4
+              with:
+                  name: flutter-web-build-preview
+                  path: build/web
+
+            - name: Skip deploy (no Firebase secret)
+              if: ${{ secrets.firebaseservice_accountkey == '' }}
+              run: echo "::notice::Firebase deploy skipped (no secret found)"
+
+            - name: Deploy to Firebase Hosting (preview)
+              if: ${{ secrets.firebaseservice_accountkey != '' }}
               uses: FirebaseExtended/action-hosting-deploy@v0
               with:
                   repoToken: ${{ secrets.GITHUB_TOKEN }}
-                  firebaseServiceAccount: ${{ secrets.firebaseservice_accountkey}}
+                  firebaseServiceAccount: ${{ secrets.firebaseservice_accountkey }}
                   projectId: fih-superset-dev
-                  channelId: preview # ephemeral per-PR
+                  channelId: preview
                   entryPoint: .

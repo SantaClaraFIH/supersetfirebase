@@ -1,4 +1,5 @@
 name: Deploy Staging on dev
+
 on:
     push:
         branches: [dev]
@@ -9,6 +10,7 @@ jobs:
         concurrency:
             group: staging-dev
             cancel-in-progress: true
+
         steps:
             - uses: actions/checkout@v4
 
@@ -28,11 +30,22 @@ jobs:
             - name: Build Flutter Web
               run: flutter build web --release --no-tree-shake-icons
 
+            - name: Upload built web (artifact)
+              uses: actions/upload-artifact@v4
+              with:
+                  name: flutter-web-build-staging
+                  path: build/web
+
+            - name: Skip deploy (no Firebase secret)
+              if: ${{ secrets.firebaseservice_accountkey == '' }}
+              run: echo "::notice::Firebase deploy skipped (no secret found)"
+
             - name: Deploy to Firebase Hosting (staging)
+              if: ${{ secrets.firebaseservice_accountkey != '' }}
               uses: FirebaseExtended/action-hosting-deploy@v0
               with:
                   repoToken: ${{ secrets.GITHUB_TOKEN }}
-                  firebaseServiceAccount: ${{ secrets.firebaseservice_accountkey}}
+                  firebaseServiceAccount: ${{ secrets.firebaseservice_accountkey }}
                   projectId: fih-superset-dev
-                  channelId: staging # persistent test URL
+                  channelId: staging
                   entryPoint: .
