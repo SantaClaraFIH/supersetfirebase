@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 import '../screens/login_screen.dart';
+import '../widgets/confirm_dialog.dart';
 
 void logout(BuildContext context) {
   showDialog(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('Logout'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-              );
-            },
-          ),
-        ],
+    barrierDismissible: true,
+    builder: (BuildContext dialogContext) {
+      return ConfirmDialog(
+        open: true,
+        title: 'Logout',
+        description: 'Are you sure you want to log out?',
+        confirmLabel: 'Logout',
+        cancelLabel: 'Cancel',
+        onConfirm: () {
+          Navigator.of(dialogContext).pop();
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => LoginScreen()),
+          );
+        },
+        onCancel: () {
+          Navigator.of(dialogContext).pop();
+        },
       );
     },
   );
