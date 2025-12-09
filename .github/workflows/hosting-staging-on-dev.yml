@@ -36,8 +36,12 @@ jobs:
                   name: flutter-web-build-staging
                   path: build/web
 
+            - name: Skip deploy (no Firebase secret)
+              if: ${{ secrets.firebaseservice_accountkey == '' }}
+              run: echo "::notice::Firebase deploy skipped (no secret found)"
+
             - name: Deploy to Firebase Hosting (staging)
-              continue-on-error: true
+              if: ${{ secrets.firebaseservice_accountkey != '' }}
               uses: FirebaseExtended/action-hosting-deploy@v0
               with:
                   repoToken: ${{ secrets.GITHUB_TOKEN }}
