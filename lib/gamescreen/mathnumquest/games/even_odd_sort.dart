@@ -19,6 +19,9 @@ class EvenOddSortApp extends StatelessWidget {
 }
 
 class EvenOddSortPage extends StatefulWidget {
+  final bool isEnglish;
+  const EvenOddSortPage({Key? key, this.isEnglish = true}) : super(key: key);
+
   @override
   _EvenOddSortPageState createState() => _EvenOddSortPageState();
 }
@@ -34,10 +37,13 @@ class _EvenOddSortPageState extends State<EvenOddSortPage> {
   late ConfettiController confettiController;
   final String gameType = 'even_odd_sort'; // Define game type
   int totalScore = 0; // Track total score for analytics
+  late bool isEnglish;
+  String t(String en, String es) => isEnglish ? en : es;
 
   @override
   void initState() {
     super.initState();
+    isEnglish = widget.isEnglish;
     flutterTts = FlutterTts();
     confettiController = ConfettiController(duration: Duration(seconds: 1));
     initialBottomNumbers = List.from(bottomNumbers);
@@ -84,10 +90,10 @@ class _EvenOddSortPageState extends State<EvenOddSortPage> {
     if (isCorrect == true) {
       score += 10;
       totalScore += 10; // Add to total score for analytics
-      speak("Correct! Well done");
+      speak(isEnglish? "Correct! Well done":'¡Correcto! Bien hecho');
       confettiController.play();
     } else {
-      speak("Oops! Try again");
+      speak(isEnglish? "Oops! Try again": '¡Ups! Inténtalo de nuevo');
     }
 
     setState(() {});
@@ -152,7 +158,21 @@ class _EvenOddSortPageState extends State<EvenOddSortPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Even Odd Sort"),
+        title: Text(t("Even Odd Sort", "Ordenar pares e impares")),
+        actions: [
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  isEnglish = !isEnglish;
+                });
+                AnalyticsEngine.logGameTranslateButtonClick();
+              },
+              label: Text(
+                isEnglish ? "Tap to Translate" : "Toca para Traducir",
+                style: const TextStyle(color: Colors.orange, fontSize: 18,fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -166,16 +186,17 @@ class _EvenOddSortPageState extends State<EvenOddSortPage> {
           Column(
             children: [
               SizedBox(height: 20),
-              Text("Drag and drop each number to its correct group",
+              Text(t("Drag and drop each number to its correct group",
+                      "Arrastra y suelta cada número en su grupo correcto"),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Text("Score: $score", style: TextStyle(fontSize: 20)),
+              Text(t('Score $score','marcar $score'), style: TextStyle(fontSize: 20)),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildDragTarget("EVEN", Colors.green, evenNumbers),
-                  buildDragTarget("ODD", Colors.blue, oddNumbers),
+                  buildDragTarget(t('EVEN','Pares'), Colors.green, evenNumbers),
+                  buildDragTarget(t('ODD','Impares'), Colors.blue, oddNumbers),
                 ],
               ),
               SizedBox(height: 20),
@@ -200,17 +221,17 @@ class _EvenOddSortPageState extends State<EvenOddSortPage> {
                   children: [
                     ElevatedButton(
                       onPressed: checkNumbers,
-                      child: Text("Check", style: TextStyle(fontSize: 20)),
+                      child: Text(t('Check', 'Verificar'), style: TextStyle(fontSize: 20)),
                     ),
                     ElevatedButton(
                       onPressed: resetGame,
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                      child: Text("Reset", style: TextStyle(fontSize: 20)),
+                      child: Text(t('Reset Game', 'Reiniciar Juego'), style: TextStyle(fontSize: 20)),
                     ),
                     ElevatedButton(
                       onPressed: newGame,
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                      child: Text("Next Game", style: TextStyle(fontSize: 20)),
+                      child: Text(t('Next Game', 'Siguiente Juego'), style: TextStyle(fontSize: 20)),
                     ),
                   ],
                 ),
@@ -220,7 +241,7 @@ class _EvenOddSortPageState extends State<EvenOddSortPage> {
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: Text(
-                    isCorrect! ? "Correct!" : "Incorrect. Try again!",
+                    isCorrect! ? t('Correct!', '¡Correcto!') : t('Incorrect!', '¡Incorrecto!'),
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,

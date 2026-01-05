@@ -11,35 +11,57 @@ import 'lessons/factors_info_page.dart';
 import 'lessons/cube_number_info_page.dart';
 import 'analytics_engine.dart';
 
-class LessonsPage extends StatelessWidget {
-  final List<Map<String, dynamic>> lessons = [
-    {'title': 'Even Numbers', 'page': EvenNumberInfoPage()},
-    {'title': 'Odd Numbers', 'page': OddNumberInfoPage()},
-    {'title': 'Prime Numbers', 'page': PrimeNumberInfoPage()},
-    {'title': 'Composite Numbers', 'page': CompositeNumberInfoPage()},
-    {'title': 'Triangular Numbers', 'page': TriangularNumberInfoPage()},
-    {'title': 'Perfect Numbers', 'page': PerfectNumberInfoPage()},
-    {'title': 'Square Numbers', 'page': SquareNumberInfoPage()},
-    {'title': 'Fibonacci Numbers', 'page': FibonacciNumberInfoPage()},
-    {'title': 'Factors', 'page': FactorsInfoPage()},
-    {'title': 'Cube Numbers', 'page': CubeNumberInfoPage()},
-  ];
+class LessonsPage extends StatefulWidget {
+  @override
+  _LessonsPageState createState() => _LessonsPageState();
+}
+
+class _LessonsPageState extends State<LessonsPage> {
+  bool isEnglish = true;
+
+  String t(String en, String es) => isEnglish ? en : es;
 
   @override
   Widget build(BuildContext context) {
-    // Log module navigation when lessons page is accessed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AnalyticsEngine.logModuleNavigation('lessons');
-       print('A Lesson in modules is logged');
+      print('A Lesson in modules is logged');
     });
+
+    final List<Map<String, dynamic>> lessons = [
+      {'title': t('Even Numbers', 'Números Pares'), 'page': EvenNumberInfoPage()},
+      {'title': t('Odd Numbers', 'Números Impares'), 'page': OddNumberInfoPage()},
+      {'title': t('Prime Numbers', 'Números Primos'), 'page': PrimeNumberInfoPage()},
+      {'title': t('Composite Numbers', 'Números Compuestos'), 'page': CompositeNumberInfoPage()},
+      {'title': t('Triangular Numbers', 'Números Triangulares'), 'page': TriangularNumberInfoPage()},
+      {'title': t('Perfect Numbers', 'Números Perfectos'), 'page': PerfectNumberInfoPage()},
+      {'title': t('Square Numbers', 'Números Cuadrados'), 'page': SquareNumberInfoPage()},
+      {'title': t('Fibonacci Numbers', 'Números Fibonacci'), 'page': FibonacciNumberInfoPage()},
+      {'title': t('Factors', 'Factores'), 'page': FactorsInfoPage()},
+      {'title': t('Cube Numbers', 'Números Cúbicos'), 'page': CubeNumberInfoPage()},
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('LESSON PLAN'),
+        title: Text(t('LESSON PLAN', 'PLAN DE LECCIONES')),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              setState(() {
+                isEnglish = !isEnglish;
+              });
+            },
+            label: Text(
+              isEnglish ? "Tap to Translate" : "Toca para Traducir",
+              style: const TextStyle(color: Colors.orange, fontSize: 20,fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/MathNumQuest/lesson_page.jpeg'),
+            image: AssetImage('assets/lesson_page.jpeg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -72,7 +94,7 @@ class LessonsPage extends StatelessWidget {
                   crossAxisSpacing: 20.0,
                   mainAxisSpacing: 20.0,
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   children: lessons.map((lesson) {
                     return LessonButton(
                       title: lesson['title'],
@@ -81,8 +103,7 @@ class LessonsPage extends StatelessWidget {
                         AnalyticsEngine.logContentSelection('lesson', lesson['title']);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => lesson['page']),
+                          MaterialPageRoute(builder: (context) => lesson['page']),
                         );
                       },
                     );
@@ -101,7 +122,7 @@ class LessonButton extends StatelessWidget {
   final String title;
   final Function()? onPressed;
 
-  LessonButton({required this.title, this.onPressed});
+  const LessonButton({required this.title, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +130,7 @@ class LessonButton extends StatelessWidget {
     double fontSize = screenWidth < 400 ? 18 : 24;
 
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.cyan.shade100,
         borderRadius: BorderRadius.circular(10),
