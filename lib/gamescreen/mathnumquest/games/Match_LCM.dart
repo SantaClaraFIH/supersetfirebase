@@ -2,33 +2,28 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:confetti/confetti.dart';
-import 'package:num_quest/game_list_page.dart';
+import 'package:supersetfirebase/gamescreen/mathnumquest/game_list_page.dart';
 import '../analytics_engine.dart'; // Import analytics engine
 
 void main() => runApp(LCMGame());
 
 class LCMGame extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "LCM Matching Game",
-      home: LCMGamePage(), 
+      home: HomePage(),
     );
   }
 }
 
-class LCMGamePage extends StatefulWidget {
-  final bool isEnglish; 
-
-  const LCMGamePage({Key? key, this.isEnglish = true}) : super(key: key);
-
+class HomePage extends StatefulWidget {
   @override
-  _LCMGamePageState createState() => _LCMGamePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _LCMGamePageState extends State<LCMGamePage> {
+class _HomePageState extends State<HomePage> {
   late List<ItemModel> items;
   late List<ItemModel> items2;
   late List<ItemModel> initialItems;
@@ -38,8 +33,6 @@ class _LCMGamePageState extends State<LCMGamePage> {
   late bool gameOver;
   final String gameType = 'lcm_match'; // Define game type
   int totalScore = 0; // Track total score for analytics
-  late bool isEnglish;
-  String t(String en, String es) => isEnglish ? en : es;
 
   late FlutterTts flutterTts;
   late ConfettiController _confettiController;
@@ -47,7 +40,6 @@ class _LCMGamePageState extends State<LCMGamePage> {
   @override
   void initState() {
     super.initState();
-    isEnglish = widget.isEnglish;
     flutterTts = FlutterTts();
     _confettiController = ConfettiController(duration: Duration(seconds: 3));
     initGame();
@@ -112,7 +104,7 @@ class _LCMGamePageState extends State<LCMGamePage> {
         items2.remove(bottomItem);
         score += 10;
         totalScore += 10; // Add to total score for analytics
-        speak(isEnglish? "Correct! Well done!": "¡Correcto! ¡Bien hecho!");
+        speak("Correct! Well done!");
         _confettiController.play();
         
         if (items.isEmpty) {
@@ -125,7 +117,7 @@ class _LCMGamePageState extends State<LCMGamePage> {
       setState(() {
         score -= 5;
         totalScore -= 5; // Subtract from total score for analytics
-        speak(isEnglish? "Oops! Try again!": "¡Ups! ¡Inténtalo de nuevo!");
+        speak("Oops! Try again!");
       });
     }
   }
@@ -141,28 +133,17 @@ class _LCMGamePageState extends State<LCMGamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(t('LCM Matching Game', 'Juego de Emparejamiento de MCM')),
+        title: Text('LCM Matching Game'),
         centerTitle: true,
-        actions: [
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  isEnglish = !isEnglish;
-                });
-                AnalyticsEngine.logGameTranslateButtonClick();
-              },
-              label: Text(
-                isEnglish ? "Tap to Translate" : "Toca para Traducir",
-                style: const TextStyle(color: Colors.orange, fontSize: 18,fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-              Navigator.pop(context);
-              AnalyticsEngine.logGameCompleteInMiddle();
-            },
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => GameListPage()),
+            );
+          // Log game completion with final score
+           AnalyticsEngine.logGameCompleteInMiddle();
+          },
         ),
       ),
       body: Stack(
@@ -170,7 +151,7 @@ class _LCMGamePageState extends State<LCMGamePage> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/LCM_bg.jpg"),
+                image: AssetImage("assets/MathNumQuest/LCM_bg.jpg"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -186,7 +167,8 @@ class _LCMGamePageState extends State<LCMGamePage> {
             padding: EdgeInsets.all(16),
             child: Column(
               children: [
-                Text( t("Drag the LCM to its matching pair!", "¡Arrastra el MCM a su par correspondiente!"),
+                Text(
+                  "Drag the LCM to its matching pair!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
@@ -195,7 +177,8 @@ class _LCMGamePageState extends State<LCMGamePage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                Text(t("Score: $score", "Puntuación: $score"),
+                Text(
+                  "Score: $score",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 40,
@@ -295,7 +278,7 @@ class _LCMGamePageState extends State<LCMGamePage> {
                   children: [
                     ElevatedButton(
                       onPressed: resetGame,
-                      child: Text(t('Reset','Reiniciar'), style: TextStyle(fontSize: 22)),
+                      child: Text("Reset", style: TextStyle(fontSize: 22)),
                       style: ElevatedButton.styleFrom(
                         padding:
                             EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -304,7 +287,7 @@ class _LCMGamePageState extends State<LCMGamePage> {
                     ),
                     ElevatedButton(
                       onPressed: newGame,
-                      child: Text(t('New Game','Nuevo Juego'), style: TextStyle(fontSize: 22)),
+                      child: Text("New Game", style: TextStyle(fontSize: 22)),
                       style: ElevatedButton.styleFrom(
                         padding:
                             EdgeInsets.symmetric(horizontal: 24, vertical: 12),

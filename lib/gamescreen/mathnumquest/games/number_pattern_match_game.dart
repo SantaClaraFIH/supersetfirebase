@@ -3,12 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import '../game_list_page.dart';
+
+// import 'package:supersetfirebase/gamescreen/mathnumquest/game_list_page.dart';
+
 import '../analytics_engine.dart'; // Import analytics engine
 
 class NumberPatternMatchGame extends StatefulWidget {
-  final bool isEnglish;
-  const NumberPatternMatchGame({Key? key, this.isEnglish = true}) : super(key: key);
   @override
   _NumberPatternMatchGameState createState() => _NumberPatternMatchGameState();
 }
@@ -18,8 +18,6 @@ class _NumberPatternMatchGameState extends State<NumberPatternMatchGame> {
   late final AudioPlayer _audioPlayer;
   final FlutterTts _flutterTts = FlutterTts();
   final String gameType = 'pattern_match'; // Define game type
-  late bool isEnglish;
-  String t(String en, String es) => isEnglish ? en : es;
 
   List<Map<String, dynamic>> questions = [
     {
@@ -75,11 +73,11 @@ class _NumberPatternMatchGameState extends State<NumberPatternMatchGame> {
 
     setState(() {
       if (hasCorrectAnswer && !hasWrongAnswer) {
-        message = isEnglish ? "Correct! Well done":'¡Correcto! Bien hecho';
+        message = 'Correct!';
         isCorrect = true;
         score += 10; // Add points for correct answer
       } else {
-        message = isEnglish ? "Try again": 'Inténtalo de nuevo';
+        message = 'Try Again!';
         isCorrect = false;
         draggedNumbers.clear();
       }
@@ -105,7 +103,7 @@ class _NumberPatternMatchGameState extends State<NumberPatternMatchGame> {
       print('Pattern Match Game completed with score: $score');
       
       setState(() {
-        message = isEnglish ? 'You have completed all questions! Final score: $score' : '¡Has completado todas las preguntas! Puntaje final: $score';
+        message = 'You have completed all questions! Final score: $score';
         _confettiController.play();
       });
       _playCelebrationSound();
@@ -119,15 +117,15 @@ class _NumberPatternMatchGameState extends State<NumberPatternMatchGame> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(t('Game Over', 'Fin del Juego')),
-            content: Text(t('Thanks for playing! Your final score is $score.', '¡Gracias por jugar! Tu puntaje final es $score.')),
+            title: Text('Game Complete!'),
+            content: Text('Congratulations!\nFinal Score: $score points\nYou completed all ${questions.length} questions!'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _startNewGame();
-                  _audioPlayer.stop();                },
-                child: Text(t('Play Again', 'Jugar de Nuevo')),
+                },
+                child: Text('Play Again'),
               ),
             ],
           );
@@ -152,7 +150,7 @@ class _NumberPatternMatchGameState extends State<NumberPatternMatchGame> {
 
   void _playCelebrationSound() async {
     try {
-      await _audioPlayer.play(AssetSource('sounds/celebration.mp3'));
+      await _audioPlayer.play(AssetSource('MathNumQuest/sounds/celebration.mp3'));
     } catch (e) {
       print('Could not play celebration sound: $e');
     }
@@ -161,7 +159,6 @@ class _NumberPatternMatchGameState extends State<NumberPatternMatchGame> {
   @override
   void initState() {
     super.initState();
-    isEnglish = widget.isEnglish;
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _audioPlayer = AudioPlayer();
   }
@@ -181,30 +178,7 @@ Widget build(BuildContext context) {
 
   return Scaffold(
     appBar: AppBar(
-      title: Text(t('Number Pattern Match', 'Coincidencia de Patrones Numéricos')),
-      actions: [
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  isEnglish = !isEnglish;
-                });
-                AnalyticsEngine.logGameTranslateButtonClick();
-              },
-              label: Text(
-                isEnglish ? "Tap to Translate" : "Toca para Traducir",
-                style: const TextStyle(color: Colors.orange, fontSize: 18,fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Center(
-            child: Text(
-              t('Score: $score', 'Puntaje: $score'),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-          ],
+      title: Text('Number Pattern Match'),
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
         onPressed: () {
@@ -214,11 +188,22 @@ Widget build(BuildContext context) {
 
         },
       ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.all(12.0),
+          child: Center(
+            child: Text(
+              'Score: $score',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
     ),
     body: Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/background1.jpg'),
+          image: AssetImage('assets/MathNumQuest/background1.jpg'),
           fit: BoxFit.cover,
         ),
       ),
@@ -229,21 +214,23 @@ Widget build(BuildContext context) {
             children: [
               // Header info
               Text(
-                t('Question ${currentQuestionIndex + 1} of ${questions.length}', 'Pregunta ${currentQuestionIndex + 1} de ${questions.length}'),
+                'Question ${currentQuestionIndex + 1} of ${questions.length}',
                 style: GoogleFonts.lato(
                   fontSize: isTablet ? 22 : 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
-              Text( t('Category: ${questions[currentQuestionIndex]['category']}', 'Categoría: ${questions[currentQuestionIndex]['category']}'),
+              Text(
+                'Category: ${questions[currentQuestionIndex]['category']}',
                 style: GoogleFonts.lato(
                   fontSize: isTablet ? 28 : 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
-              Text( t('Score: $score', 'Puntaje: $score'),
+              Text(
+                'Score: $score',
                 style: GoogleFonts.lato(
                   fontSize: isTablet ? 22 : 16,
                   fontWeight: FontWeight.bold,
@@ -295,7 +282,8 @@ Widget build(BuildContext context) {
                                 );
                               }).toList(),
                             )
-                          : Text(t('Drag numbers here', 'Arrastra los números aquí'),
+                          : Text(
+                              'Drop numbers here',
                               style: GoogleFonts.lato(
                                 fontSize: isTablet ? 22 : 18,
                                 fontWeight: FontWeight.bold,
@@ -317,8 +305,8 @@ Widget build(BuildContext context) {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildButton(t('Submit','enviar'), Colors.teal, checkAnswer, isTablet),
-                  _buildButton(t('New Game','Nuevo Juego'), Colors.green, _startNewGame, isTablet),
+                  _buildButton('Submit', Colors.teal, checkAnswer, isTablet),
+                  _buildButton('New Game', Colors.green, _startNewGame, isTablet),
                 ],
               ),
 
@@ -334,7 +322,7 @@ Widget build(BuildContext context) {
                 ),
               ),
               const SizedBox(height: 6),
-              _buildButton(t('Next Question','Siguiente pregunta"'), Colors.orange, nextQuestion, isTablet),
+              _buildButton('Next Question', Colors.orange, nextQuestion, isTablet),
 
               _buildConfetti(),
             ],

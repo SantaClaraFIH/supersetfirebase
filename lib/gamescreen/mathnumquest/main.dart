@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'analytics_engine.dart';
-import 'package:num_quest/FlashCards/practice_page.dart';
+import 'package:supersetfirebase/gamescreen/mathnumquest/FlashCards/practice_page.dart';
 import 'game_list_page.dart';
 import 'lessons_page.dart';
+import 'package:supersetfirebase/screens/teens_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,47 +16,38 @@ void main() async {
 
   await AnalyticsEngine.init();
 
-  runApp(const RootApp());
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: NumQuestPage(),
+  ));
 }
 
-class RootApp extends StatelessWidget {
-  const RootApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MyApp(),
-    );
-  }
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool isEnglish = true;
-
-  String t(String en, String es) => isEnglish ? en : es;
-
+class NumQuestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TeensPage()),
+            );
+          },
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: <Widget>[
-          // Background image
           Positioned.fill(
             child: Image.asset(
-              'assets/start_page.jpg',
+              'assets/MathNumQuest/start_page.jpg',
               fit: BoxFit.cover,
             ),
           ),
-
-          // Dark gradient overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -70,40 +62,15 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
           ),
-          // Translate button
-          Positioned(
-            top: 40,
-            right: 20,
-            child: TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  isEnglish = !isEnglish;
-                });
-              },
-              //icon: const Icon(Icons.translate, color: Colors.white),
-              label: Text(
-                isEnglish ? 'Tap to Translate' : 'Toca para Traducir',
-                style: const TextStyle(
-                  color: Colors.orange,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-
-          // Main content
           Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isSmallScreen = constraints.maxWidth < 600;
-
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    // Title
                     ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
+                      shaderCallback: (bounds) => LinearGradient(
                         colors: [Colors.orange, Colors.yellowAccent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -115,7 +82,7 @@ class _MyAppState extends State<MyApp> {
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Raleway',
                           color: Colors.white,
-                          shadows: const [
+                          shadows: [
                             Shadow(
                               blurRadius: 8,
                               color: Colors.black54,
@@ -125,9 +92,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: isSmallScreen ? 30 : 50),
-
                     if (isSmallScreen)
                       Column(children: _buildButtons(context, isSmallScreen))
                     else
@@ -148,45 +113,39 @@ class _MyAppState extends State<MyApp> {
   List<Widget> _buildButtons(BuildContext context, bool isSmallScreen) {
     return [
       GameButton(
-        text: t('LESSONS', 'LECCIONES'),
+        text: 'LESSONS',
         color: Colors.blueAccent,
-        isSmallScreen: isSmallScreen,
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => LessonsPage(),
-            ),
+            MaterialPageRoute(builder: (context) =>  LessonsPage()),
           );
         },
+        isSmallScreen: isSmallScreen,
       ),
       SizedBox(width: isSmallScreen ? 0 : 30, height: isSmallScreen ? 20 : 0),
       GameButton(
-        text: t('PRACTICE', 'PRÁCTICA'),
+        text: 'PRACTICE',
         color: Colors.greenAccent.shade700,
-        isSmallScreen: isSmallScreen,
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => PracticePage(),
-            ),
+            MaterialPageRoute(builder: (context) =>  PracticePage()),
           );
         },
+        isSmallScreen: isSmallScreen,
       ),
       SizedBox(width: isSmallScreen ? 0 : 30, height: isSmallScreen ? 20 : 0),
       GameButton(
-        text: t('PLAY', 'JUGAR'),
+        text: 'PLAY',
         color: Colors.deepOrangeAccent,
-        isSmallScreen: isSmallScreen,
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => GameListPage(),
-            ),
+            MaterialPageRoute(builder: (context) =>  GameListPage()),
           );
         },
+        isSmallScreen: isSmallScreen,
       ),
     ];
   }
@@ -199,7 +158,6 @@ class GameButton extends StatelessWidget {
   final Color color;
 
   const GameButton({
-    super.key,
     required this.text,
     required this.onPressed,
     required this.isSmallScreen,

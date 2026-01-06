@@ -148,11 +148,6 @@ static void logPracticeAnswer(String practiceType, bool isCorrect) async {
     );
   }
 
-  static void logGameTranslateButtonClick() async {
-    print('Game Translate button clicked');
-    //await _logEventSafely();
-  }
-
   // Log game completion with score
   static void logGameComplete(String gameType, int score) async {
     print('Game Completed: $gameType with score: $score');

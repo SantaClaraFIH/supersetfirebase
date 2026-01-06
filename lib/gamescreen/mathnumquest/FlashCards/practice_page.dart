@@ -8,15 +8,7 @@ import 'CubeNumberInfoPage.dart';
 import 'FactorsNumberInfoPage.dart';
 import '../analytics_engine.dart'; 
 
-class PracticePage extends StatefulWidget {
-  @override
-  _PracticePageState createState() => _PracticePageState();
-}
-class _PracticePageState extends State<PracticePage> {
-  bool isEnglish = true;
-
-  String t(String en, String es) => isEnglish ? en : es;
-
+class PracticePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Log module navigation when practice page is accessed
@@ -26,25 +18,12 @@ class _PracticePageState extends State<PracticePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t("PRACTICE", "PRÁCTICA")),
-        actions: [
-          TextButton.icon(
-            onPressed: () {
-              setState(() {
-                isEnglish = !isEnglish;
-              });
-            },
-            label: Text(
-              isEnglish ? "Tap to Translate" : "Toca para Traducir",
-              style: const TextStyle(color: Colors.orange, fontSize: 20,fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
+        title: Text("PRACTICE"),
       ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/background1.jpg'),
+            image: AssetImage('assets/MathNumQuest/background1.jpg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -80,7 +59,7 @@ class _PracticePageState extends State<PracticePage> {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     LessonButton(
-                      title: t('ODD & EVEN\nNUMBERS', 'NÚMEROS\nIMPARES & PARES'),
+                      title: 'ODD & EVEN\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'ODD & EVEN NUMBERS');
@@ -93,7 +72,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('PRIME\nNUMBERS', 'NÚMEROS\nPRIMOS'),
+                      title: 'PRIME\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'PRIME NUMBERS');
@@ -106,7 +85,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('COMPOSITE\nNUMBERS', 'NÚMEROS\nCOMPUESTOS'),
+                      title: 'COMPOSITE\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'COMPOSITE NUMBERS');
@@ -120,7 +99,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('PERFECT\nNUMBERS', 'NÚMEROS\nPERFECTOS'),
+                      title: 'PERFECT\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'PERFECT NUMBERS');
@@ -134,7 +113,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('SQUARE\nNUMBERS', 'NÚMEROS\nCUADRADOS'), 
+                      title: 'SQUARE\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'SQUARE NUMBERS');
@@ -147,7 +126,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('FACTORS', 'FACTORES'),
+                      title: 'FACTORS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'FACTORS');
@@ -160,7 +139,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('CUBE\nNUMBERS', 'NÚMEROS\nCÚBICOS'),
+                      title: 'CUBE\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                         AnalyticsEngine.logContentSelection('practice', 'CUBE NUMBERS');
@@ -173,7 +152,7 @@ class _PracticePageState extends State<PracticePage> {
                       },
                     ),
                     LessonButton(
-                      title: t('MODULO\nNUMBERS', 'NÚMEROS\nMÓDULO'),
+                      title: 'MODULO\nNUMBERS',
                       onPressed: () {
                         // Log content selection before navigation
                        // AnalyticsEngine.logContentSelection('practice', 'MODULO NUMBERS');
@@ -196,7 +175,7 @@ class LessonButton extends StatelessWidget {
   final String title;
   final Function()? onPressed;
 
- const LessonButton({required this.title, this.onPressed});
+  LessonButton({required this.title, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +183,7 @@ class LessonButton extends StatelessWidget {
     double fontSize = screenWidth < 400 ? 18 : 24;
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.cyan.shade100,
         borderRadius: BorderRadius.circular(10),

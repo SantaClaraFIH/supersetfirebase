@@ -20,10 +20,6 @@ class ChooseFactorsGame extends StatelessWidget {
 }
 
 class DartGamePage extends StatefulWidget {
-  final bool isEnglish;
-
-  const DartGamePage({Key? key, this.isEnglish = true}) : super(key: key); 
-
   @override
   _DartGamePageState createState() => _DartGamePageState();
 }
@@ -38,13 +34,10 @@ class _DartGamePageState extends State<DartGamePage> {
   late ConfettiController _confettiController;
   final String gameType = 'choose_factors'; // Define game type
   int totalScore = 0; // Track total score for analytics
-  late bool isEnglish;
-  String t(String en, String es) => isEnglish ? en : es;
 
   @override
   void initState() {
     super.initState();
-    isEnglish = widget.isEnglish;
     flutterTts = FlutterTts();
     _confettiController = ConfettiController(duration: Duration(seconds: 3));
     generateRound();
@@ -87,9 +80,10 @@ class _DartGamePageState extends State<DartGamePage> {
         break;
       }
     }
+
     setState(() {
       isCorrect = correct && factors.length == selectedFactors.length;
-      feedback = isCorrect! ? t('Correct!', '¡Correcto!') : t('Incorrect!', '¡Incorrecto!');
+      feedback = isCorrect! ? 'Correct!' : 'Incorrect!';
       
       // Add to score if correct
       if (isCorrect!) {
@@ -99,10 +93,9 @@ class _DartGamePageState extends State<DartGamePage> {
 
     if (isCorrect!) {
       _confettiController.play();
-      await flutterTts.speak(isEnglish ? "Correct!" : "¡Correcto!");
-
+      await flutterTts.speak("Correct!");
     } else {
-      await flutterTts.speak(isEnglish? "Incorrect" : "Inténtalo de nuevo!");
+      await flutterTts.speak("Try again!");
     }
   }
 
@@ -149,35 +142,22 @@ class _DartGamePageState extends State<DartGamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(t('Choose factors of the given number', 'Elige los factores del número dado')),
-          actions: [
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  isEnglish = !isEnglish;
-                });
-                AnalyticsEngine.logGameTranslateButtonClick(); 
-              },
-              label: Text(
-                isEnglish ? "Tap to Translate" : "Toca para Traducir",
-                style: const TextStyle(color: Colors.orange, fontSize: 18,fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-              AnalyticsEngine.logGameCompleteInMiddle();
-            },
-          ),
+        title: Text('Choose factors of the given number', style: TextStyle(fontSize: 20)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+            // Log game completion with final score
+            AnalyticsEngine.logGameCompleteInMiddle();
+          },
         ),
+      ),
       body: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/Bigschooldesk_generated.jpg'),
+                image: AssetImage('assets/MathNumQuest/Bigschooldesk_generated.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -195,10 +175,9 @@ class _DartGamePageState extends State<DartGamePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(t('Round $roundNumber', 'Ronda $roundNumber'), style: TextStyle(fontSize: 24)),
+                  Text('Round $roundNumber', style: TextStyle(fontSize: 24)),
                   SizedBox(height: 30),
-                  Text(t('Select the Factors of $generatedNumber', 'Selecciona los factores de $generatedNumber'),
-                      style: TextStyle(fontSize: 20)),
+                  Text('Select the Factors of $generatedNumber', style: TextStyle(fontSize: 20)),
                   SizedBox(height: 30),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -231,9 +210,13 @@ class _DartGamePageState extends State<DartGamePage> {
                       }),
                     ),
                   ),
-                  ElevatedButton(onPressed: checkAnswer, child: Text(t('Check', 'Verificar'), style: TextStyle(fontSize: 18))),
-                  ElevatedButton(onPressed: nextRound, child: Text(t('Next Round', 'Siguiente Ronda'), style: TextStyle(fontSize: 18))),
-                  ElevatedButton(onPressed: resetGame, child: Text(t('Reset Game', 'Reiniciar Juego'), style: TextStyle(fontSize: 18))),
+                  SizedBox(height: 20),
+                  ElevatedButton(onPressed: checkAnswer, child: Text('Check', style: TextStyle(fontSize: 18))),
+                  SizedBox(height: 10),
+                  ElevatedButton(onPressed: nextRound, child: Text('Next Round', style: TextStyle(fontSize: 18))),
+                  SizedBox(height: 10),
+                  ElevatedButton(onPressed: resetGame, child: Text('Reset Game', style: TextStyle(fontSize: 18))),
+                  SizedBox(height: 20),
                   Text(
                     feedback,
                     style: TextStyle(
