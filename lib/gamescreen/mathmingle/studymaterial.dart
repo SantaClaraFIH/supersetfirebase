@@ -261,7 +261,15 @@ class _StudyMaterialScreenState extends State<StudyMaterialScreen> {
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.easeInOut,
                     );
-                    setState(() => currentPage++);
+                    setState(() {
+                      currentPage++;
+                    });
+                    if (chapter != null &&
+                        translations["spanish"] != null &&
+                        translations["spanish"]!.length > currentPage) {
+                      _playAudio(
+                          translations["spanish"]![currentPage], chapter);
+                    }
                   }),
                 if (currentPage > 0 &&
                     currentPage < (translations["spanish"]?.length ?? 1) - 1)
@@ -270,7 +278,15 @@ class _StudyMaterialScreenState extends State<StudyMaterialScreen> {
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.easeInOut,
                     );
-                    setState(() => currentPage++);
+                    setState(() {
+                      currentPage++;
+                    });
+                    if (chapter != null &&
+                        translations["spanish"] != null &&
+                        translations["spanish"]!.length > currentPage) {
+                      _playAudio(
+                          translations["spanish"]![currentPage], chapter);
+                    }
                   }),
                 if (currentPage == (translations["spanish"]?.length ?? 1) - 1)
                   _buildNavButton('E X I T', () {
@@ -290,6 +306,11 @@ class _StudyMaterialScreenState extends State<StudyMaterialScreen> {
       translations = data;
       isLoading = false;
     });
+    // Play audio for the first card
+    if (translations["spanish"] != null &&
+        translations["spanish"]!.isNotEmpty) {
+      _playAudio(translations["spanish"]![0], chapter);
+    }
   }
 
   Widget _buildNavButton(String label, VoidCallback onPressed,

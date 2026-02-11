@@ -48,6 +48,10 @@ class _MemoryGameState extends State<MemoryGame> {
   void initState() {
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 1));
+    // Initialize audio players
+    _audioPlayer = AudioPlayer();
+    _tickPlayer = AudioPlayer();
+    _wordPlayer = AudioPlayer();
     super.initState();
     _initializeTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,6 +64,9 @@ class _MemoryGameState extends State<MemoryGame> {
   @override
   void dispose() {
     _timer.cancel();
+    _audioPlayer.dispose();
+    _tickPlayer.dispose();
+    _wordPlayer.dispose();
     super.dispose();
     _confettiController.dispose();
   }
@@ -405,17 +412,18 @@ class _MemoryGameState extends State<MemoryGame> {
           } else {
             matchedWord = _data[currentIndex];   // Spanish → English
           }
-          Future.delayed(const Duration(seconds: 1), () => showMatchPopup(matchedWord));
-          //showMatchPopup(matchedWord);
-
           if (_matchedPairs == _data.length ~/ 2) {
             _timer.cancel();
             //int score = ((_seconds / 120) * 10).toInt();
             int score = (_seconds >= 80 ? 10 : (_seconds / 120) * 10).toInt();
-            showEndGameDialog(score);
-            Future.delayed(Duration.zero, () {
-              Provider.of<GameData1>(context, listen: false).setTotal(score);
-            });
+             showMatchPopup(matchedWord, onDismiss: () {
+               showEndGameDialog(score);
+               Future.delayed(Duration.zero, () {
+                 Provider.of<GameData1>(context, listen: false).setTotal(score);
+               });
+             });
+          } else {
+             showMatchPopup(matchedWord);
           }
         } else {
           _wait = true;
@@ -499,17 +507,27 @@ class _MemoryGameState extends State<MemoryGame> {
       },
     );
   }
-  void showMatchPopup(String matchedWord) {
-  final fileName = matchedWord.toLowerCase().replaceAll("/", "_");
-  String fileName2 = fileName;
-  if (fileName=="≠")fileName2 = "not_equal";
- 
-  // 1) Play tick first:
-  _tickPlayer.play(AssetSource('Mathmingle/audio/Correct_Answer_Tick.mp3')).then((_) {
-    // 2) Only after tick finishes play the matchedWord audio:   
-  _wordPlayer.play(AssetSource('Mathmingle/audio/$fileName.mp3'));
-  //_wordPlayer.play(AssetSource('Mathmingle/audio/$matchedWord.mp3'));
-  });
+  void showMatchPopup(String matchedWord, {VoidCallback? onDismiss}) {
+     // baseName preserves the original case (e.g., "One", "Addition")
+    final String baseName = matchedWord.replaceAll("/", "_");
+    
+    // Audio Logic:
+    // Chapter 1 audio files are lowercase (e.g., "one.mp3").
+    // Other chapters have capitalized audio files (e.g., "Addition.mp3").
+    String audioName = (chapter == 1) ? baseName.toLowerCase() : baseName;
+
+    // Image Logic:
+    // Image files appear to be capitalized for both chapters (e.g., "One.png", "Addition.png").
+    String fileName2 = baseName;
+    if (fileName2 == "≠") fileName2 = "not_equal";
+
+    // 1) Play tick first:
+    _tickPlayer
+        .play(AssetSource('Mathmingle/audio/Correct_Answer_Tick.mp3'))
+        .then((_) {
+      // 2) Only after tick finishes play the matchedWord audio:
+      _wordPlayer.play(AssetSource('Mathmingle/audio/$audioName.mp3'));
+    });
 
   showDialog(
     context: context,
@@ -598,7 +616,11 @@ class _MemoryGameState extends State<MemoryGame> {
         ],
       );
     },
-  );
+  ).then((_) {
+      if (onDismiss != null) {
+        onDismiss();
+      }
+    });
 }
 
   bool isMatch(String t1, String t2) {

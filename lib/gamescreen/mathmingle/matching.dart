@@ -238,6 +238,9 @@ class _MatchGameState extends State<MatchGame> {
                           (scale < 1.0) ? 220 * scale : 170 * scale;
                       double itemHeight =
                           (scale < 1.0) ? 95 * scale : 120 * scale;
+                      
+                      // Responsive gap: larger gap for larger screens (> 1000px)
+                      double gap = constraints.maxWidth > 1000 ? 500 : 250;
 
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -318,68 +321,63 @@ class _MatchGameState extends State<MatchGame> {
                               );
                             }).toList(),
                           ),
-                          const Spacer(),
+                          SizedBox(width: gap),
                           Column(
                             children: items2.map((item) {
-                              return SizedBox(
-                                width: itemWidth,
-                                height: itemHeight,
-                                child: MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: DragTarget<ItemModel>(
-                                    onAcceptWithDetails: (details) {
-                                      final ItemModel receivedItem =
-                                          details.data;
-                                      if (item.value == receivedItem.value) {
-                                        setState(() {
-                                          items.remove(receivedItem);
-                                          items2.remove(item);
-                                          score += 2;
-                                          item.accepting = false;
-                                        });
-                                        showMatchPopup(item.name);
-                                      } else {
-                                        setState(() {
-                                          item.accepting = false;
-                                        });
-                                      }
-                                    },
-                                    onLeave: (receivedItem) {
+                              return MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: DragTarget<ItemModel>(
+                                  onAcceptWithDetails: (details) {
+                                    final ItemModel receivedItem =
+                                        details.data;
+                                    if (item.value == receivedItem.value) {
+                                      setState(() {
+                                        items.remove(receivedItem);
+                                        items2.remove(item);
+                                        score += 2;
+                                        item.accepting = false;
+                                      });
+                                      showMatchPopup(item.name);
+                                    } else {
                                       setState(() {
                                         item.accepting = false;
                                       });
-                                    },
-                                    onWillAcceptWithDetails: (receivedItem) {
-                                      setState(() {
-                                        item.accepting = true;
-                                      });
-                                      return true;
-                                    },
-                                    builder: (context, acceptedItems,
-                                            rejectedItem) =>
-                                        Container(
-                                      decoration: BoxDecoration(
-                                        color: item.accepting
-                                            ? Colors.red
-                                            : Colors.white70,
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        border: Border.all(
-                                            color: Colors.white, width: 2.0),
+                                    }
+                                  },
+                                  onLeave: (receivedItem) {
+                                    setState(() {
+                                      item.accepting = false;
+                                    });
+                                  },
+                                  onWillAcceptWithDetails: (receivedItem) {
+                                    setState(() {
+                                      item.accepting = true;
+                                    });
+                                    return true;
+                                  },
+                                  builder: (context, acceptedItems,
+                                          rejectedItem) =>
+                                      Container(
+                                    decoration: BoxDecoration(
+                                      color: item.accepting
+                                          ? Colors.red
+                                          : Colors.white,
+                                      borderRadius:
+                                          BorderRadius.circular(10.0),
+                                      border: Border.all(
+                                          color: Colors.white70, width: 2.0),
+                                    ),
+                                    height: itemHeight,
+                                    width: itemWidth,
+                                    alignment: Alignment.center,
+                                    margin: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      item.name,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 20.0 * scale,
                                       ),
-                                      height: itemHeight,
-                                      width: itemWidth,
-                                      alignment: Alignment.center,
-                                      margin: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        item.name,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18.0 * scale,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
@@ -533,17 +531,25 @@ class _MatchGameState extends State<MatchGame> {
   }
 
   void showMatchPopup(String matchedWord) {
-    final fileName = matchedWord.toLowerCase().replaceAll("/", "_");
-    String fileName2 = fileName;
-    if (fileName == "≠") fileName2 = "not_equal";
+    // baseName preserves the original case (e.g., "One", "Addition")
+    final String baseName = matchedWord.replaceAll("/", "_");
+
+    // Audio Logic:
+    // Chapter 1 audio files are lowercase (e.g., "one.mp3").
+    // Other chapters have capitalized audio files (e.g., "Addition.mp3").
+    String audioName = (chapter == 1) ? baseName.toLowerCase() : baseName;
+
+    // Image Logic:
+    // Image files appear to be capitalized for both chapters (e.g., "One.png", "Addition.png").
+    String imageName = baseName;
+    if (baseName == "≠") imageName = "not_equal";
 
     // 1) Play tick first:
     _tickPlayer
         .play(AssetSource('Mathmingle/audio/Correct_Answer_Tick.mp3'))
         .then((_) {
       // 2) Only after tick finishes play the matchedWord audio:
-      _wordPlayer.play(AssetSource('Mathmingle/audio/$fileName.mp3'));
-      //_wordPlayer.play(AssetSource('Mathmingle/audio/$matchedWord.mp3'));
+      _wordPlayer.play(AssetSource('Mathmingle/audio/$audioName.mp3'));
     });
 
     showDialog(
@@ -603,7 +609,7 @@ class _MatchGameState extends State<MatchGame> {
                 const SizedBox(height: 8),
 
                 Image.asset(
-                  'assets/Mathmingle/$fileName2.png',
+                  'assets/Mathmingle/$imageName.png',
                   height: imageHeight,
                   fit: BoxFit.contain,
                 ),
