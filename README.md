@@ -1,5 +1,8 @@
 # Superset Firebase Project
 
+##**Webiste**
+https://fih-superset-dev.web.app/
+
 ## Overview
 
 Superset Firebase is a full-stack Flutter application integrated with Firebase to support real-time data operations, user authentication, and cross-platform functionality. The project is tailored for Android, iOS, and Web platforms with seamless integration of Firebase Realtime Database.
@@ -199,7 +202,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Contact
 
-For any inquiries or contributions, reach out to pujithakallu.21@gmial.com maddurisriram09@gmail.com.
+For any inquiries or contributions, reach out to pujithakallu.21@gmail.com maddurisriram09@gmail.com.
 
 ---
 
