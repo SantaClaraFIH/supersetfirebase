@@ -4,6 +4,8 @@ import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/birdgame.
 import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/memorygameapp.dart';
 import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/PlaceValueScreenState1.dart';
 import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/ChooseItGameScreen.dart';
+import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/cashier_game.dart';
+import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/chef_game.dart';
 
 class GameSelectionDialog extends StatelessWidget {
   const GameSelectionDialog({super.key});
@@ -67,6 +69,10 @@ class GameSelectionDialog extends StatelessWidget {
                         ChooseItGameScreen(), Colors.purple),
                     _buildGameButton(context, '🎈 Decimal Pop!',
                         const DecimalPopGame(), Colors.teal),
+                    _buildGameButton(context, '🛒 Decimal Cashier',
+                        const CashierGameScreen(), Colors.deepOrange),
+                    _buildGameButton(context, '🍳 Decimal Chef',
+                        const ChefGameScreen(), Colors.orange),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
