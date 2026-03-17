@@ -15,7 +15,7 @@ dependencies:
     cloud_firestore: ^5.5.1
     provider: ^6.1.2
     firebase_data_connect: ^0.1.4+1
-    google_fonts: ^5.0.0
+    google_fonts: ^8.0.2
     http: ^1.2.2
     audioplayers: ^6.1.1
     firebase_analytics: ^11.3.0
