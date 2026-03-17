@@ -202,10 +202,10 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Contact
 
-For any inquiries or contributions, reach out to pujithakallu.21@gmail.com maddurisriram09@gmail.com.
+For any inquiries or contributions, reach out to pujithakallu.21@gmail.com, prasannapsand@gmail.com, maddurisriram09@gmail.com.
 
 ---
 
 ## Author
-Pujitha Kallu, Sriram Madduri
+Pujitha Kallu, Prasanna Sand, Sriram Madduri
 
