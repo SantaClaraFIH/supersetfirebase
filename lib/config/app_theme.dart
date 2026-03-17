@@ -158,7 +158,7 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.light.cardBackground,
         elevation: 8,
         shadowColor: AppColors.light.cardShadow,
@@ -241,7 +241,7 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.dark.cardBackground,
         elevation: 8,
         shadowColor: AppColors.dark.cardShadow,
