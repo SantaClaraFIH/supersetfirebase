@@ -389,42 +389,45 @@ class _MemoryGameState extends State<MemoryGame> {
         String text1 = _data[_previousIndex];
         String text2 = _data[currentIndex];
         if (isMatch(text1, text2)) {
-          setState(() {
-            _cardFlips[_previousIndex] = false;
-            _cardFlips[currentIndex] = false;
-            _matchedPairs++;
-            _currentlyFlippedCount = 0;
-            _showCorrectIcon = true;
-          });
-          Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) {
-              setState(() {
-                _showCorrectIcon = false;
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (!mounted) return;
+            setState(() {
+              _cardFlips[_previousIndex] = false;
+              _cardFlips[currentIndex] = false;
+              _matchedPairs++;
+              _currentlyFlippedCount = 0;
+              _showCorrectIcon = true;
+            });
+            Future.delayed(const Duration(seconds: 1), () {
+              if (mounted) {
+                setState(() {
+                  _showCorrectIcon = false;
+                });
+              }
+            });
+            _confettiController.play(); // Celebrate match
+
+            String matchedWord;
+            if (_translations.containsKey(_data[_previousIndex])) {
+              matchedWord = _data[_previousIndex]; // English → Spanish
+            } else {
+              matchedWord = _data[currentIndex]; // Spanish → English
+            }
+
+            if (_matchedPairs == _data.length ~/ 2) {
+              _timer.cancel();
+              int score = (_seconds >= 80 ? 10 : (_seconds / 120) * 10).toInt();
+              showMatchPopup(matchedWord, onDismiss: () {
+                showEndGameDialog(score);
+                Future.delayed(Duration.zero, () {
+                  Provider.of<GameData1>(context, listen: false)
+                      .setTotal(score);
+                });
               });
+            } else {
+              showMatchPopup(matchedWord);
             }
           });
-          _confettiController.play(); // Celebrate match
-          
-           String matchedWord;
-
-          if (_translations.containsKey(_data[_previousIndex])) {
-            matchedWord = _data[_previousIndex];  // English → Spanish
-          } else {
-            matchedWord = _data[currentIndex];   // Spanish → English
-          }
-          if (_matchedPairs == _data.length ~/ 2) {
-            _timer.cancel();
-            //int score = ((_seconds / 120) * 10).toInt();
-            int score = (_seconds >= 80 ? 10 : (_seconds / 120) * 10).toInt();
-             showMatchPopup(matchedWord, onDismiss: () {
-               showEndGameDialog(score);
-               Future.delayed(Duration.zero, () {
-                 Provider.of<GameData1>(context, listen: false).setTotal(score);
-               });
-             });
-          } else {
-             showMatchPopup(matchedWord);
-          }
         } else {
           _wait = true;
           Future.delayed(const Duration(milliseconds: 1500), () {
