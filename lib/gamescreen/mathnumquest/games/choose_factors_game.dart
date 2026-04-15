@@ -20,6 +20,10 @@ class ChooseFactorsGame extends StatelessWidget {
 }
 
 class DartGamePage extends StatefulWidget {
+  final bool isEnglish;
+
+  const DartGamePage({Key? key, this.isEnglish = true}) : super(key: key); 
+
   @override
   _DartGamePageState createState() => _DartGamePageState();
 }
@@ -34,10 +38,13 @@ class _DartGamePageState extends State<DartGamePage> {
   late ConfettiController _confettiController;
   final String gameType = 'choose_factors'; // Define game type
   int totalScore = 0; // Track total score for analytics
+  late bool isEnglish;
+  String t(String en, String es) => isEnglish ? en : es;
 
   @override
   void initState() {
     super.initState();
+    isEnglish = widget.isEnglish;
     flutterTts = FlutterTts();
     _confettiController = ConfettiController(duration: Duration(seconds: 3));
     generateRound();
@@ -80,10 +87,9 @@ class _DartGamePageState extends State<DartGamePage> {
         break;
       }
     }
-
     setState(() {
       isCorrect = correct && factors.length == selectedFactors.length;
-      feedback = isCorrect! ? 'Correct!' : 'Incorrect!';
+      feedback = isCorrect! ? t('Correct!', '¡Correcto!') : t('Incorrect!', '¡Incorrecto!');
       
       // Add to score if correct
       if (isCorrect!) {
@@ -93,9 +99,10 @@ class _DartGamePageState extends State<DartGamePage> {
 
     if (isCorrect!) {
       _confettiController.play();
-      await flutterTts.speak("Correct!");
+      await flutterTts.speak(isEnglish ? "Correct!" : "¡Correcto!");
+
     } else {
-      await flutterTts.speak("Try again!");
+      await flutterTts.speak(isEnglish? "Incorrect" : "Inténtalo de nuevo!");
     }
   }
 
@@ -139,98 +146,222 @@ class _DartGamePageState extends State<DartGamePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Choose factors of the given number', style: TextStyle(fontSize: 20)),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-            // Log game completion with final score
-            AnalyticsEngine.logGameCompleteInMiddle();
-          },
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: const Color(0xFFE0F2F1),
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: const Color(0xFF004D40),
+      title: Text(
+        t('Choose factors of the given number',
+            'Elige los factores del número dado'),
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          backgroundColor: const Color(0xFF004D40)
         ),
       ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/MathNumQuest/Bigschooldesk_generated.jpg'),
-                fit: BoxFit.cover,
-              ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            setState(() {
+              isEnglish = !isEnglish;
+            });
+            AnalyticsEngine.logGameTranslateButtonClick();
+          },
+          child: Text(
+            isEnglish ? "Translate" : "Traducir",
+            style: const TextStyle(
+              color: Color(0xFF80CBC4),
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
             ),
           ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: false,
-            ),
+        ),
+      ],
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          Navigator.pop(context);
+          AnalyticsEngine.logGameCompleteInMiddle();
+        },
+      ),
+    ),
+    body: Stack(
+      children: [
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
           ),
-          Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Round $roundNumber', style: TextStyle(fontSize: 24)),
-                  SizedBox(height: 30),
-                  Text('Select the Factors of $generatedNumber', style: TextStyle(fontSize: 20)),
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                    child: Wrap(
-                      spacing: 5,
-                      runSpacing: 5,
+        ),
+        Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFB2DFDB), Color(0xFF80CBC4)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x3300897B),
+                      blurRadius: 24,
+                      offset: Offset(0, 14),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      t('Round $roundNumber', 'Ronda $roundNumber'),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF004D40),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      t('Select the Factors of $generatedNumber',
+                          'Selecciona los factores de $generatedNumber'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Color(0xFF004D40),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    /// NUMBER GRID
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
                       children: List.generate(20, (index) {
-                        return SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                if (selectedFactors.contains(index + 1)) {
-                                  selectedFactors.remove(index + 1);
-                                } else {
-                                  selectedFactors.add(index + 1);
-                                }
-                              });
-                            },
-                            child: Text('${index + 1}', style: TextStyle(fontSize: 16)),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              backgroundColor: selectedFactors.contains(index + 1)
-                                  ? Colors.green
+                        final number = index + 1;
+                        final selected =
+                            selectedFactors.contains(number);
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (selected) {
+                                selectedFactors.remove(number);
+                              } else {
+                                selectedFactors.add(number);
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 55,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              gradient: selected
+                                  ? const LinearGradient(
+                                      colors: [
+                                        Color(0xFF26A69A),
+                                        Color(0xFF00897B)
+                                      ],
+                                    )
                                   : null,
+                              color: selected
+                                  ? null
+                                  : Colors.white.withOpacity(0.9),
+                              borderRadius:
+                                  BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: selected
+                                      ? const Color(0x4000897B)
+                                      : Colors.black12,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$number',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? Colors.white
+                                    : const Color(0xFF004D40),
+                              ),
                             ),
                           ),
                         );
                       }),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(onPressed: checkAnswer, child: Text('Check', style: TextStyle(fontSize: 18))),
-                  SizedBox(height: 10),
-                  ElevatedButton(onPressed: nextRound, child: Text('Next Round', style: TextStyle(fontSize: 18))),
-                  SizedBox(height: 10),
-                  ElevatedButton(onPressed: resetGame, child: Text('Reset Game', style: TextStyle(fontSize: 18))),
-                  SizedBox(height: 20),
-                  Text(
-                    feedback,
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: isCorrect == true ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
+
+                    const SizedBox(height: 30),
+
+                    /// ACTION BUTTONS
+                    _buildPrimaryButton(
+                        t('Check', 'Verificar'), checkAnswer),
+                    const SizedBox(height: 12),
+                    _buildPrimaryButton(
+                        t('Next Round', 'Siguiente Ronda'),
+                        nextRound),
+                    const SizedBox(height: 12),
+                    _buildPrimaryButton(
+                        t('Reset Game', 'Reiniciar Juego'),
+                        resetGame),
+
+                    const SizedBox(height: 24),
+
+                    Text(
+                      feedback,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: isCorrect == true
+                            ? const Color(0xFF004D40)
+                            : Colors.red.shade700,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ],
+        ),
+      ],
+    ),
+  );
+}
+
+  Widget _buildPrimaryButton(String text, VoidCallback onPressed) {
+  return SizedBox(
+    width: double.infinity,
+    child: FilledButton(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: const Color(0xFF004D40),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
       ),
-    );
-  }
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+      ),
+    ),
+  );
+}
+
 }

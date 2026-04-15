@@ -8,20 +8,42 @@ import 'games/Match_LCM.dart';
 import 'games/Squares_Game.dart';
 import 'analytics_engine.dart'; // Import analytics engine
 
-class GameListPage extends StatelessWidget {
+class GameListPage extends StatefulWidget {
+  @override
+  _GameListPageState createState() => _GameListPageState();
+}
+
+class _GameListPageState extends State<GameListPage> {
+  bool isEnglish = true;
+
+  String t(String en, String es) => isEnglish ? en : es;
+
   @override
   Widget build(BuildContext context) {
-    // Log module navigation when games page is accessed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AnalyticsEngine.logModuleNavigation('games');
     });
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("GAMES"),
+        title: Text(t("GAMES", "JUEGOS")),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              setState(() {
+                isEnglish = !isEnglish;
+              });
+            },
+            //icon: const Icon(Icons.translate, color: Colors.white),
+            label: Text(
+              isEnglish ? "Tap to Translate" : "Toca para Traducir",
+              style: const TextStyle(color: Colors.orange, fontSize: 20,fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/background1.jpg'),
             fit: BoxFit.cover,
@@ -56,96 +78,94 @@ class GameListPage extends StatelessWidget {
                   crossAxisSpacing: 20.0,
                   mainAxisSpacing: 20.0,
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
                     GameButton(
-                      title: 'Choose Factors\nGame',
+                      title: t('Choose Factors\nGame', 'Elige Factores\nJuego'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'Choose Factors Game');
                         AnalyticsEngine.logGameStart('choose_factors');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => DartGamePage()),
+                          MaterialPageRoute(builder: (context) => DartGamePage(isEnglish: isEnglish)),
                         );
                       },
                     ),
                     GameButton(
-                      title: 'Perfect Square\nGame',
+                      title: t('Perfect Square\nGame', 'Juego de\nCuadrado Perfecto'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'Perfect Square Game');
                         AnalyticsEngine.logGameStart('perfect_square');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => PerfectSquareFinder()),
+                          MaterialPageRoute(
+                            builder: (context) => SquareFinderGame(isEnglish: isEnglish),
+                          ),
                         );
                       },
                     ),
                     GameButton(
-                      title: 'Number Pattern\nMatch',
+                      title: t('Number Pattern\nMatch', 'Coincidencia de\nPatrones Numéricos'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'Number Pattern Match');
                         AnalyticsEngine.logGameStart('pattern_match');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => NumberPatternMatchGame()),
+                          MaterialPageRoute(
+                            builder: (context) => NumberPatternMatchGame(isEnglish: isEnglish),
+                          ),
                         );
                       },
                     ),
                     GameButton(
-                      title: 'Even-Odd Sort\nGame',
+                      title: t('Even-Odd Sort\nGame', 'Juego de\nNúmeros Pares e Impares'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'Even-Odd Sort Game');
                         AnalyticsEngine.logGameStart('even_odd_sort');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => EvenOddSortPage()),
+                          MaterialPageRoute(
+                            builder: (context) => EvenOddSortPage(isEnglish: isEnglish),
+                          ),
                         );
                       },
                     ),
                     GameButton(
-                      title: 'Triangle Tower\nBuilder',
+                      title: t('Triangle Tower\nBuilder', 'Constructor de\nTorres Triangulares'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'Triangle Tower Builder');
                         AnalyticsEngine.logGameStart('triangle_tower');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => WordProblemsGame()),
+                          MaterialPageRoute(
+                            builder: (context) => WordProblemsGame(isEnglish: isEnglish),
+                          ),
                         );
                       },
                     ),
                     GameButton(
-                      title: 'Prime Explorer',
+                      title: t('Prime Explorer', 'Explorador de\nNúmeros Primos'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'Prime Explorer');
                         AnalyticsEngine.logGameStart('prime_explorer');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => PrimeNumberGame()),
+                          MaterialPageRoute(
+                            builder: (context) => PrimeNumberGrid(isEnglish: isEnglish),
+                          ),
                         );
                       },
                     ),
                     GameButton(
-                      title: 'LCM Match',
+                      title: t('LCM Match', 'Coincidencia de MCM'),
                       onPressed: () {
-                        // Log content selection and game start
                         AnalyticsEngine.logContentSelection('game', 'LCM Match');
                         AnalyticsEngine.logGameStart('lcm_match');
-                        
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => LCMGame()),
+                          MaterialPageRoute(
+                            builder: (context) => LCMGamePage(isEnglish: isEnglish),
+                          ),
                         );
                       },
                     ),
@@ -164,7 +184,7 @@ class GameButton extends StatelessWidget {
   final String title;
   final Function()? onPressed;
 
-  GameButton({required this.title, this.onPressed});
+  const GameButton({required this.title, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +192,7 @@ class GameButton extends StatelessWidget {
     double fontSize = screenWidth < 400 ? 18 : 24;
 
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.cyan.shade100,
         borderRadius: BorderRadius.circular(10),
