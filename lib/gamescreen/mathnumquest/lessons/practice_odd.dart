@@ -100,7 +100,7 @@ class _WordProblemPracticeState extends State<WordProblemPractice> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/MathNumQuest/word_problem.jpg'),
+            image: AssetImage('assets/word_problem.jpg'),
             fit: BoxFit.cover,
           ),
         ),

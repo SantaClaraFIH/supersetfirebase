@@ -165,6 +165,12 @@ static void logPracticeAnswer(String practiceType, bool isCorrect) async {
     //await _logEventSafely();
   }
 
+  static void logGameTranslateButtonClick() async {
+    print('Game Translate button clicked');
+    //await _logEventSafely();
+  }
+
+
   // Log correct/incorrect answers in games (Unsed Kept for future implementation)
   static void logGameAnswer(String gameType, bool isCorrect, int currentScore) async {
     print('Game - $gameType: Answer ${isCorrect ? 'Correct' : 'Incorrect'}, Score: $currentScore');
