@@ -7,8 +7,7 @@ import 'package:supersetfirebase/gamescreen/mathdecimals/screens/games/chef_game
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:supersetfirebase/services/translation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChefGameScreen extends StatefulWidget {
@@ -335,19 +334,11 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     final values = <String>[];
     _buildTranslationPayload(keys, values);
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/translate'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'texts': values}),
-      );
-      if (response.statusCode == 200 && mounted) {
-        final data = jsonDecode(response.body);
-        final translations = List<String>.from(data['translations'] as List);
-        if (translations.length == keys.length) {
-          setState(() {
-            translatedTexts = {for (int i = 0; i < keys.length; i++) keys[i]: translations[i]};
-          });
-        }
+      final translations = await TranslationService.translateList(values);
+      if (mounted && translations.length == keys.length) {
+        setState(() {
+          translatedTexts = {for (int i = 0; i < keys.length; i++) keys[i]: translations[i]};
+        });
       }
     } catch (_) {
       // Keep existing translatedTexts; new step may show mixed until next manual translate
@@ -417,36 +408,21 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       final values = <String>[];
       _buildTranslationPayload(keys, values);
       try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/translate'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'texts': values}),
-        );
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final translations = List<String>.from(data['translations'] as List);
-          if (mounted && translations.length == keys.length) {
-            setState(() {
-              translatedTexts = {for (int i = 0; i < keys.length; i++) keys[i]: translations[i]};
-              translated = true;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Translated to Spanish')),
-            );
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Translation failed: ${response.statusCode}')),
-            );
-          }
+        final translations = await TranslationService.translateList(values);
+        if (mounted && translations.length == keys.length) {
+          setState(() {
+            translatedTexts = {for (int i = 0; i < keys.length; i++) keys[i]: translations[i]};
+            translated = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Translated to Spanish')),
+          );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Translation unavailable. Start the backend server (see README).'),
+              content: Text('Translation unavailable. Please check your connection.'),
             ),
           );
         }
@@ -570,24 +546,16 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       if (completionData != null) toTranslate.add(dialogStatus);
       toTranslate.addAll([scoreLabel, homeLabel]);
       try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/translate'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'texts': toTranslate}),
-        );
-        if (response.statusCode == 200 && mounted) {
-          final data = jsonDecode(response.body);
-          final t = List<String>.from(data['translations'] as List);
-          if (t.length == toTranslate.length) {
-            dialogTitle = t[0];
-            dialogMessage = t[1];
-            int i = 2;
-            if (completionData != null) {
-              dialogStatus = t[i++];
-            }
-            scoreLabel = t[i++];
-            homeLabel = t[i];
+        final t = await TranslationService.translateList(toTranslate);
+        if (mounted && t.length == toTranslate.length) {
+          dialogTitle = t[0];
+          dialogMessage = t[1];
+          int i = 2;
+          if (completionData != null) {
+            dialogStatus = t[i++];
           }
+          scoreLabel = t[i++];
+          homeLabel = t[i];
         }
       } catch (_) {}
     }
@@ -746,22 +714,14 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
 
     if (translated) {
       try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/translate'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'texts': [dialogTitle, dialogMessage, finalScoreLabel, homeLabel],
-          }),
+        final t = await TranslationService.translateList(
+          [dialogTitle, dialogMessage, finalScoreLabel, homeLabel],
         );
-        if (response.statusCode == 200 && mounted) {
-          final data = jsonDecode(response.body);
-          final t = List<String>.from(data['translations'] as List);
-          if (t.length >= 4) {
-            dialogTitle = t[0];
-            dialogMessage = t[1];
-            finalScoreLabel = t[2];
-            homeLabel = t[3];
-          }
+        if (mounted && t.length >= 4) {
+          dialogTitle = t[0];
+          dialogMessage = t[1];
+          finalScoreLabel = t[2];
+          homeLabel = t[3];
         }
       } catch (_) {}
     }

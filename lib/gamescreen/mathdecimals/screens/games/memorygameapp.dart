@@ -2,8 +2,7 @@ import 'dart:math'; // Import for random selection
 import 'package:supersetfirebase/gamescreen/mathdecimals/selection_pages/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:supersetfirebase/services/translation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MemoryGameScreen extends StatefulWidget {
@@ -23,23 +22,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   bool translated = false;
   Future<void> translateTexts() async {
     if (!translated) {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/translate'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'texts': originalTexts.values.toList()}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      try {
+        final translations = await TranslationService.translateMap(originalTexts);
         setState(() {
-          translatedTexts = {
-            for (int i = 0; i < originalTexts.keys.length; i++)
-              originalTexts.keys.elementAt(i): data['translations'][i]
-          };
+          translatedTexts = translations;
           translated = true;
         });
-      } else {
-        print('Failed to fetch translations: ${response.statusCode}');
+      } catch (e) {
+        debugPrint('Failed to fetch translations: $e');
       }
     } else {
       setState(() {
