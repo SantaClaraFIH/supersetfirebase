@@ -213,6 +213,7 @@ class _PartsOfEquationsState extends State<PartsOfEquations> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(

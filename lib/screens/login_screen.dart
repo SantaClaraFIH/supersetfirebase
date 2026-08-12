@@ -537,14 +537,17 @@ class _LoginScreenState extends State<LoginScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                'Create New Secret Code',
-                                style: TextStyle(
-                                  fontSize: isMobile ? 14 : 16,
-                                  color: colors.accentText,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: colors.accentText,
+                              Flexible(
+                                child: Text(
+                                  'Create New Secret Code',
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 14 : 16,
+                                    color: colors.accentText,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: colors.accentText,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                               SizedBox(width: 8),

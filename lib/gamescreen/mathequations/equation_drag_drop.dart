@@ -384,10 +384,12 @@ class _EquationDragDropState extends State<EquationDragDrop> {
   @override
   void initState() {
     super.initState();
-    // Reset the session score for Game 1
-    final sessionScoreProvider =
-        Provider.of<SessionScoreProvider>(context, listen: false);
-    sessionScoreProvider.resetGame1Score();
+    // Provider notifications cannot be dispatched while the route is building.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Provider.of<SessionScoreProvider>(context, listen: false)
+          .resetGame1Score();
+    });
     _shuffledQuestions = List.from(_questions);
     _shuffleQuestions();
     _initializeDraggables();
@@ -584,6 +586,7 @@ class _EquationDragDropState extends State<EquationDragDrop> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'equations_logout',
           onPressed: () => logout(context),
           backgroundColor: Colors.white,
           child: const Icon(
@@ -894,6 +897,7 @@ class _EquationDragDropState extends State<EquationDragDrop> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(

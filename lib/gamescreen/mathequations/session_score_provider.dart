@@ -21,16 +21,19 @@ class SessionScoreProvider with ChangeNotifier {
   }
 
   void resetGame1Score() {
+    if (_game1BestScore == 0) return;
     _game1BestScore = 0;
     notifyListeners();
   }
 
   void resetGame2Score() {
+    if (_game2BestScore == 0) return;
     _game2BestScore = 0;
     notifyListeners();
   }
 
   void resetSessionScores() {
+    if (_game1BestScore == 0 && _game2BestScore == 0) return;
     _game1BestScore = 0;
     _game2BestScore = 0;
     notifyListeners();

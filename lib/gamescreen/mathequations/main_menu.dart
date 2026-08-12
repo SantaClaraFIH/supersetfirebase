@@ -37,6 +37,7 @@ class _MainMenuState extends State<MainMenu> {
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: FloatingActionButton(
+            heroTag: 'equations_back',
             onPressed: () {
               Navigator.of(context, rootNavigator: true).pop();
               //  Navigator.pushReplacement(
@@ -161,6 +162,7 @@ class _MainMenuState extends State<MainMenu> {
 
       // Logout button (Bottom right)
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(

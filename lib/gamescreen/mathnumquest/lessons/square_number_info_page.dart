@@ -522,4 +522,3 @@ class _SquareNumberInfoPageState extends State<SquareNumberInfoPage> {
     return hsl.withLightness(lightness).toColor();
   }
 }
-
