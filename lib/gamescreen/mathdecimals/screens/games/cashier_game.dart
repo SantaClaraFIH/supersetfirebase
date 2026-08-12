@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:http/http.dart' as http;
+import 'package:supersetfirebase/services/translation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cashier/bottom_controls.dart';
 import 'cashier/models.dart';
@@ -287,35 +286,15 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     }
 
     try {
-      final response = await http
-          .post(
-            Uri.parse('http://localhost:3000/translate'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'texts': originalTexts.values.toList()}),
-          )
+      final translations = await TranslationService
+          .translateMap(originalTexts)
           .timeout(const Duration(seconds: 8));
-
-      if (response.statusCode != 200) {
-        _showTranslationError();
-        return;
-      }
-
-      final data = jsonDecode(response.body);
-      final translations = data['translations'];
-      if (translations is! List ||
-          translations.length != originalTexts.keys.length) {
-        _showTranslationError();
-        return;
-      }
 
       if (!mounted) {
         return;
       }
       setState(() {
-        translatedTexts = {
-          for (int index = 0; index < originalTexts.keys.length; index++)
-            originalTexts.keys.elementAt(index): '${translations[index]}',
-        };
+        translatedTexts = translations;
         translated = true;
       });
     } on TimeoutException {

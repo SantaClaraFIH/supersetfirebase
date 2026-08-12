@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:math';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:supersetfirebase/services/translation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DecimalPopGame extends StatefulWidget {
@@ -81,21 +80,14 @@ class _DecimalPopGameState extends State<DecimalPopGame>
 
   Future<void> translateTexts() async {
     if (!translated) {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/translate'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'texts': originalTexts.values.toList()}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      try {
+        final translations = await TranslationService.translateMap(originalTexts);
         setState(() {
-          translatedTexts = {
-            for (int i = 0; i < originalTexts.keys.length; i++)
-              originalTexts.keys.elementAt(i): data['translations'][i]
-          };
+          translatedTexts = translations;
           translated = true;
         });
+      } catch (e) {
+        debugPrint('Failed to fetch translations: $e');
       }
     } else {
       setState(() {
