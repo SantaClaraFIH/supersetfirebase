@@ -181,6 +181,7 @@ class _WhatAreEquationsDetailState extends State<WhatAreEquationsDetail> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(

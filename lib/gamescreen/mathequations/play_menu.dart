@@ -109,6 +109,7 @@ class PlayMenu extends StatelessWidget {
             bottom: 16,
             right: 16,
             child: FloatingActionButton(
+              heroTag: 'equations_logout',
               onPressed: () => logout(context),
               backgroundColor: Colors.white,
               child: const Icon(

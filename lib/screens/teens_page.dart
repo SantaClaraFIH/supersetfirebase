@@ -12,7 +12,7 @@ import '../widgets/card_grid.dart';
 import '../gamescreen/mathequations/main.dart' show MathEquationsApp;
 import '../gamescreen/mathgeometry/main.dart' show BilingualMathGeo;
 import '../gamescreen/mathdecimals/main.dart' show DecimalApp;
-import '../gamescreen/mathnumquest/main.dart' show NumQuestPage;
+import '../gamescreen/mathnumquest/main.dart' show MyApp;
 
 class TeensPage extends StatefulWidget {
   const TeensPage({Key? key}) : super(key: key);
@@ -99,7 +99,7 @@ class _TeensPageState extends State<TeensPage>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => NumQuestPage(),
+                  builder: (_) => const MyApp(),
                 ),
               );
             },

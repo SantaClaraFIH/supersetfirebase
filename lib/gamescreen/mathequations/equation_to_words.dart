@@ -553,10 +553,12 @@ class _EquationToWordsScreenState extends State<EquationToWordsScreen> {
   @override
   void initState() {
     super.initState();
-    // Reset the session score for Game 2
-    final sessionScoreProvider =
-        Provider.of<SessionScoreProvider>(context, listen: false);
-    sessionScoreProvider.resetGame2Score();
+    // Provider notifications cannot be dispatched while the route is building.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Provider.of<SessionScoreProvider>(context, listen: false)
+          .resetGame2Score();
+    });
     _loadLevelQuestions();
     _loadRandomQuestion();
   }
@@ -923,6 +925,7 @@ class _EquationToWordsScreenState extends State<EquationToWordsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(

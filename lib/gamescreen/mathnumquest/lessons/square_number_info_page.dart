@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../widgets/MultipageContainer.dart';
-import 'package:num_quest/FlashCards/SquaresPracticePage.dart';
+import 'package:supersetfirebase/gamescreen/mathnumquest/FlashCards/SquaresPracticePage.dart';
 import '../analytics_engine.dart';
 
 class SquareNumberInfoPage extends StatefulWidget {
@@ -522,4 +522,3 @@ class _SquareNumberInfoPageState extends State<SquareNumberInfoPage> {
     return hsl.withLightness(lightness).toColor();
   }
 }
-

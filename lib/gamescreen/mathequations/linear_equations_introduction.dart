@@ -226,6 +226,7 @@ class _LinearEquationsIntroductionState
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(

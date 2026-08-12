@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'analytics_engine.dart';
-import 'package:num_quest/FlashCards/practice_page.dart';
+import 'package:supersetfirebase/gamescreen/mathnumquest/FlashCards/practice_page.dart';
 import 'game_list_page.dart';
 import 'lessons_page.dart';
 
@@ -40,6 +40,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isEnglish = true;
 
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsEngine.init();
+  }
+
   String t(String en, String es) => isEnglish ? en : es;
 
   @override
@@ -50,7 +56,7 @@ class _MyAppState extends State<MyApp> {
           // Background image
           Positioned.fill(
             child: Image.asset(
-              'assets/start_page.jpg',
+              'assets/MathNumQuest/start_page.jpg',
               fit: BoxFit.cover,
             ),
           ),
@@ -68,6 +74,21 @@ class _MyAppState extends State<MyApp> {
                   end: Alignment.bottomCenter,
                 ),
               ),
+            ),
+          ),
+
+          // Return to the screen that launched NumQuest (normally Teens).
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton.filled(
+              tooltip: 'Back to games',
+              onPressed: () => Navigator.of(context).maybePop(),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black54,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.arrow_back),
             ),
           ),
 

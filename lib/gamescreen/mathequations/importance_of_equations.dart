@@ -135,6 +135,7 @@ class _ImportanceOfEquationsState extends State<ImportanceOfEquations> {
 
       // Logout button (bottom right)
       floatingActionButton: FloatingActionButton(
+        heroTag: 'equations_logout',
         onPressed: () => logout(context),
         backgroundColor: Colors.white,
         child: const Icon(
