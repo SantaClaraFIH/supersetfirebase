@@ -481,7 +481,10 @@ class _StudyMaterialScreenState extends State<StudyMaterialScreen> {
   }
 
   void _playAudio(String english, int chapter) {
-    final fileName = english.replaceAll("/", "_");
+    String fileName = english.replaceAll("/", "_");
+    if (chapter == 1) {
+      fileName = fileName.toLowerCase();
+    }
     _audioPlayer.play(AssetSource('Mathmingle/audio/$fileName.mp3'));
     AnalyticsEngine.logAudioButtonClick_MathMingle(english, chapter);
   }
