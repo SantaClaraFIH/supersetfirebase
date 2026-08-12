@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../widgets/MultipageContainer.dart';
-import 'package:num_quest/FlashCards/PerfectNumbersPracticePage.dart';
+import 'package:supersetfirebase/gamescreen/mathnumquest/FlashCards/PerfectNumbersPracticePage.dart';
 import '../analytics_engine.dart';
 
 class PerfectNumberInfoPage extends StatefulWidget {

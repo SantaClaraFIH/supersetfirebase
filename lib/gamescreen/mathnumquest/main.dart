@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'analytics_engine.dart';
-import 'package:num_quest/FlashCards/practice_page.dart';
+import 'package:supersetfirebase/gamescreen/mathnumquest/FlashCards/practice_page.dart';
 import 'game_list_page.dart';
 import 'lessons_page.dart';
 
@@ -237,5 +237,14 @@ class GameButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class NumQuestPage extends StatelessWidget {
+  const NumQuestPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const RootApp();
   }
 }
