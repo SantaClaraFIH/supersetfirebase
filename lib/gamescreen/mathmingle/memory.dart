@@ -676,16 +676,16 @@ class _MemoryGameState extends State<MemoryGame> {
     switch (chapter) {
       case 1:
         englishWords = [
-          'one',
-          'two',
-          'three',
-          'four',
-          'five',
-          'six',
-          'seven',
-          'eight',
-          'nine',
-          'ten',
+          'One',
+          'Two',
+          'Three',
+          'Four',
+          'Five',
+          'Six',
+          'Seven',
+          'Eight',
+          'Nine',
+          'Ten',
           "Eleven",
           "Twelve",
           "Thirteen",
@@ -905,7 +905,7 @@ class _MemoryGameState extends State<MemoryGame> {
         ];
         break;
       default:
-        englishWords = ['one', 'two'];
+        englishWords = ['One', 'Two'];
         spanishWords = ['uno', 'dos'];
     }
     return [englishWords, spanishWords];
@@ -915,16 +915,16 @@ class _MemoryGameState extends State<MemoryGame> {
     switch (chapter) {
       case 1:
         return {
-          'one': 'uno',
-          'two': 'dos',
-          'three': 'tres',
-          'four': 'cuatro',
-          'five': 'cinco',
-          'six': 'seis',
-          'seven': 'siete',
-          'eight': 'ocho',
-          'nine': 'nueve',
-          'ten': 'diez',
+          'One': 'uno',
+          'Two': 'dos',
+          'Three': 'tres',
+          'Four': 'cuatro',
+          'Five': 'cinco',
+          'Six': 'seis',
+          'Seven': 'siete',
+          'Eight': 'ocho',
+          'Nine': 'nueve',
+          'Ten': 'diez',
           'Eleven': 'Once',
           'Twelve': 'Doce',
           'Thirteen': 'Trece',
@@ -1029,7 +1029,7 @@ class _MemoryGameState extends State<MemoryGame> {
           "Gradient": "Gradiente"
         };
       default:
-        return {'one': 'uno', 'two': 'dos'};
+        return {'One': 'uno', 'Two': 'dos'};
     }
   }
 }
