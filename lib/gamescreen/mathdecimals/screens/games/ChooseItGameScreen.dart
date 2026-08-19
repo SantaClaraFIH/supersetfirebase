@@ -209,9 +209,9 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
 
     if (answer == questions[currentQuestionIndex]['description']) {
       score += 10;
-      await _playSound('sounds/success.mp3');
+      await _playSound('MathDecimals/sounds/success.mp3');
     } else {
-      await _playSound('sounds/error.mp3');
+      await _playSound('MathDecimals/sounds/error.mp3');
     }
   }
 

@@ -265,7 +265,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       if (answer == correctValue) {
         feedback = "Correct!";
         feedbackColor = Colors.green;
-        _playSound('sounds/success.mp3');
+        _playSound('MathDecimals/sounds/success.mp3');
         showBubble = true;
         score += 10;
         _saveBestScore(score);

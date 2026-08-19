@@ -360,10 +360,10 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
           if (questions.first[key] == value.data) {
             draggedItems[key] = value.data;
             feedback[key] = true;
-            _playSound('sounds/success.mp3');
+            _playSound('MathDecimals/sounds/success.mp3');
           } else {
             feedback[key] = false;
-            _playSound('sounds/error.mp3');
+            _playSound('MathDecimals/sounds/error.mp3');
           }
           bool allCorrect = true;
           for (var entry in questions.first.entries) {

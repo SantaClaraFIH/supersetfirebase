@@ -122,13 +122,13 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
 
   void _checkAnswer(int selected) async {
     if (selected == correctAnswer) {
-      await _playSound('sounds/success.mp3');
+      await _playSound('MathDecimals/sounds/success.mp3');
       setState(() {
         score += 10;
         _generateQuestion();
       });
     } else {
-      await _playSound('sounds/error.mp3');
+      await _playSound('MathDecimals/sounds/error.mp3');
       showDialog(
         context: context,
         builder: (context) => AlertDialog(

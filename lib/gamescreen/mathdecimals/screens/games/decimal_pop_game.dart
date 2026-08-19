@@ -66,7 +66,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _flutterTts = FlutterTts();
   late List<double> shuffledOptions;
-  late List<AnimationController> _controllers;
+  List<AnimationController> _controllers = [];
   late List<Animation<double>> _animations;
   late AnimationController _mascotController;
   late Animation<double> _mascotBounce;
@@ -200,6 +200,9 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   }
 
   void _initAnimations() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
     _controllers = List.generate(
         4,
         (index) => AnimationController(
@@ -262,7 +265,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
     Future.delayed(const Duration(milliseconds: 500), () {
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: const Text('🎈 Thank You!'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -280,7 +283,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.pop(dialogContext);
+                Navigator.pop(context);
               },
               child: const Text('Home'),
             ),
@@ -293,7 +297,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                   _initAnimations();
                   mascotMessage = "Ask me how to say it!";
                 });
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text('Play Again'),
             ),

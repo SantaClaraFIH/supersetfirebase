@@ -351,23 +351,23 @@ final List<Recipe> chefGameRecipes = [
 
 final Map<String, RecipeCompletionData> recipeCompletionData = {
   'Pancakes': RecipeCompletionData(
-    message: 'Pancake batter ready! We will start cooking them in a pan. You will be served soon!',
+    message: 'Pancake batter is ready! We will start cooking them in a pan. You will be served soon!',
     visualType: 'pan',
   ),
   'Cookies': RecipeCompletionData(
-    message: 'Cookie dough ready! We will bake them in the oven. You will be served soon!',
+    message: 'Cookie dough is ready! We will bake them in the oven. You will be served soon!',
     visualType: 'oven_cookies',
   ),
   'Chocolate Cake': RecipeCompletionData(
-    message: 'Cake batter ready! We will bake it in the oven. You will be served soon!',
+    message: 'Cake batter is ready! We will bake it in the oven. You will be served soon!',
     visualType: 'oven_cake',
   ),
   'Hummus': RecipeCompletionData(
-    message: 'Hummus ready! You will be served soon!',
+    message: 'Hummus is ready! You will be served soon!',
     visualType: 'cup_hummus',
   ),
   'Fruit Smoothie': RecipeCompletionData(
-    message: 'Smoothie ready! You will be served soon!',
+    message: 'Smoothie is ready! You will be served soon!',
     visualType: 'glass_smoothie',
   ),
 };

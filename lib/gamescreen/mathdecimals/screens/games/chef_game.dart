@@ -286,8 +286,8 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     }
   }
 
-  void _speakCurrentStep() {
-    if (_isSpeaking) {
+  void _speakCurrentStep({bool force = false}) {
+    if (_isSpeaking && !force) {
       _stopSpeaking();
       return;
     }
@@ -323,7 +323,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     }
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        _speakCurrentStep();
+        _speakCurrentStep(force: true);
       }
     });
   }
@@ -459,10 +459,10 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       if (translated) {
         // Fetch new step's translations first, then speak so we don't speak the old question.
         _refetchTranslationsForCurrentStep().then((_) {
-          if (mounted) _speakCurrentStep();
+          if (mounted) _speakCurrentStep(force: true);
         });
       } else {
-        _speakCurrentStep();
+        _speakCurrentStep(force: true);
       }
     }
   }
@@ -527,13 +527,21 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   Future<void> _showRecipeCompleteDialog() async {
     final String recipeName = recipes[currentRecipeIndex].name;
     final String message = "Amazing! You completed the $recipeName recipe!";
-    _speak(message);
     final RecipeCompletionData? completionData = recipeCompletionData[recipeName];
-    if (completionData != null) {
-      Future.delayed(const Duration(milliseconds: 2500), () {
-        if (mounted) _speak(completionData.message);
-      });
-    }
+    
+    // Original code kept for reference:
+    // _speak(message);
+    // if (completionData != null) {
+    //   Future.delayed(const Duration(milliseconds: 2500), () {
+    //     if (mounted) _speak(completionData.message);
+    //   });
+    // }
+    
+    // Combine both sentences into one continuous speech to avoid truncation
+    final String fullSpeech = completionData != null 
+        ? "$message ${completionData.message}" 
+        : message;
+    _speak(fullSpeech);
 
     String dialogTitle = 'Recipe Complete!';
     String dialogMessage = message;
@@ -563,7 +571,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     if (!mounted) return;
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFFFFFBF7),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
@@ -674,7 +682,10 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                   ),
                 ),
                 child: InkWell(
-                  onTap: () => Navigator.popUntil(context, (route) => route.isFirst),
+                  onTap: () {
+                    Navigator.pop(dialogContext);
+                    Navigator.pop(context);
+                  },
                   borderRadius: BorderRadius.circular(24),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -731,7 +742,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       if (!mounted) return;
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           backgroundColor: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -782,7 +793,10 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                   ),
                 ),
                 child: InkWell(
-                  onTap: () => Navigator.popUntil(context, (route) => route.isFirst),
+                  onTap: () {
+                    Navigator.pop(dialogContext);
+                    Navigator.pop(context);
+                  },
                   borderRadius: BorderRadius.circular(24),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
