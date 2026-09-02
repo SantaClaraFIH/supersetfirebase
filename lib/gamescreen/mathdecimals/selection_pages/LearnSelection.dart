@@ -73,7 +73,7 @@ class LearnSelection extends StatelessWidget {
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
                       child: const Text(
-                        'Cancel',
+                        'Home',
                         style: TextStyle(fontSize: 18, color: Colors.red),
                       ),
                     ),

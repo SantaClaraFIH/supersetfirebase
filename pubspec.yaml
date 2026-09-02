@@ -319,6 +319,8 @@ flutter:
         - assets/MathDecimals/decimalpopbg.png
         - assets/MathDecimals/poppy.png
         - assets/MathDecimals/learnsectionbg.png
+        - assets/MathDecimals/cooking.png
+        - assets/MathDecimals/ChooseRecipePage.png
 
         #MathNumQuest
 
