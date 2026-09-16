@@ -405,7 +405,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
             ),
           Positioned(
             bottom: 10,
-            left: 10,
+            left: 40,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -423,8 +423,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                     },
                     child: const Icon(
                       Icons.volume_up,
-                      size: 60,
-                      color: Colors.blue,
+                      size: 75,
+                      color: Colors.black,
                     ),
                   ),
                 ),
