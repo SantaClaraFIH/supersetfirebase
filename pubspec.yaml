@@ -38,6 +38,9 @@ dependencies:
     # tflite_flutter: ^0.9.0
     # tflite_flutter_helper: ^0.3.1
     font_awesome_flutter: ^10.7.0
+    webview_flutter: ^4.14.1
+    webview_flutter_web: ^0.2.3+4
+    web: ^1.1.1
 
 dev_dependencies:
     flutter_test:
@@ -89,6 +92,7 @@ flutter:
         - assets/images/math_countseq.png
         - assets/images/decimals.png
         - assets/images/math_numquest.png
+        - assets/images/fractions.png
 
         - assets/images/spiderman.png
         #  Mathgeometry

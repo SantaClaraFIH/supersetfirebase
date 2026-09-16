@@ -13,6 +13,7 @@ import '../gamescreen/mathequations/main.dart' show MathEquationsApp;
 import '../gamescreen/mathgeometry/main.dart' show BilingualMathGeo;
 import '../gamescreen/mathdecimals/main.dart' show DecimalApp;
 import '../gamescreen/mathnumquest/main.dart' show MyApp;
+import 'fractions_webview_screen.dart' show FractionsWebViewScreen;
 
 class TeensPage extends StatefulWidget {
   const TeensPage({Key? key}) : super(key: key);
@@ -100,6 +101,19 @@ class _TeensPageState extends State<TeensPage>
                 context,
                 MaterialPageRoute(
                   builder: (_) => const MyApp(),
+                ),
+              );
+            },
+          },
+          {
+            'title': 'Fractions',
+            'subtitle': 'Play with fractions!',
+            'image': 'assets/images/fractions.png',
+            'onTap': () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FractionsWebViewScreen(),
                 ),
               );
             },
