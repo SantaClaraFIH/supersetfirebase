@@ -3,16 +3,21 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class SpeechCloud extends StatelessWidget {
-  const SpeechCloud({super.key, required this.text});
+  const SpeechCloud({
+    super.key,
+    required this.text,
+    this.height = 116,
+    this.fontSize = 15,
+  });
 
   final String text;
-
-  static const double _height = 116;
+  final double height;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
     final textStyle = TextStyle(
-      fontSize: 15,
+      fontSize: fontSize,
       fontWeight: FontWeight.w600,
       color: Colors.brown.shade800,
       height: 1.25,
@@ -20,24 +25,19 @@ class SpeechCloud extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cloudWidth = constraints.maxWidth > 0 ? constraints.maxWidth : 120.0;
-        const contentWidthPadding = 100.0;
-        const padding = 12.0;
-        // On very narrow screens, shrink the horizontal padding so we never
-        // end up with negative or zero content width.
-        final horizontalPadding =
-            max(0.0, min(contentWidthPadding, (cloudWidth - 20.0) / 2));
+        final padding = (height * 0.1).clamp(6.0, 14.0);
+        final horizontalPadding = (cloudWidth * 0.12).clamp(10.0, 32.0);
         final contentWidth = max(0.0, cloudWidth - horizontalPadding * 2);
-        final contentHeight = _height - padding * 2;
-        // Limit text width so it doesn't stretch edge-to-edge inside the cloud.
-        final textMaxWidth = contentWidth * 0.88;
+        final contentHeight = max(0.0, height - padding * 2);
+        final textMaxWidth = contentWidth * 0.92;
         return SizedBox(
           width: cloudWidth,
-          height: _height,
+          height: height,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               CustomPaint(
-                size: Size(cloudWidth, _height),
+                size: Size(cloudWidth, height),
                 painter: CloudShapePainter(),
               ),
               Positioned(
@@ -67,9 +67,12 @@ class SpeechCloud extends StatelessWidget {
               ),
               Positioned(
                 left: -6,
-                bottom: _height * 0.3,
+                bottom: height * 0.3,
                 child: CustomPaint(
-                  size: const Size(16, 20),
+                  size: Size(
+                    (16 * (height / 116)).clamp(10.0, 16.0),
+                    (20 * (height / 116)).clamp(12.0, 20.0),
+                  ),
                   painter: SpeechCloudTailPainter(),
                 ),
               ),

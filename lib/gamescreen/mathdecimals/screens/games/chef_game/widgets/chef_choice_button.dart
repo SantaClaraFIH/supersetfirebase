@@ -11,6 +11,11 @@ class ChefChoiceButton extends StatelessWidget {
     required this.isDisabled,
     this.wrongBorderValue = 0.0,
     required this.onTap,
+    this.height = 62,
+    this.fontSize = 17,
+    this.iconSize = 22,
+    this.borderRadius = 24,
+    this.padding,
   });
 
   final String label;
@@ -19,6 +24,11 @@ class ChefChoiceButton extends StatelessWidget {
   final bool isDisabled;
   final double wrongBorderValue;
   final VoidCallback? onTap;
+  final double height;
+  final double fontSize;
+  final double iconSize;
+  final double borderRadius;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -81,20 +91,22 @@ class ChefChoiceButton extends StatelessWidget {
       ];
     }
 
+    final effPadding = padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+
     return SizedBox(
       width: double.infinity,
-      height: 62,
+      height: height,
       child: Material(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(borderRadius),
         elevation: isIdle ? 2 : 4,
         shadowColor: (isCorrect ? Colors.green : isWrong ? Colors.red : Colors.orange)
             .withValues(alpha: 0.35),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(borderRadius),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(borderRadius),
               gradient: gradientColors != null
                   ? LinearGradient(
                       begin: Alignment.topLeft,
@@ -106,25 +118,28 @@ class ChefChoiceButton extends StatelessWidget {
               border: border,
               boxShadow: boxShadows,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: effPadding,
             child: Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, color: iconColor ?? Colors.white, size: 22),
+                  Icon(icon, color: iconColor ?? Colors.white, size: iconSize),
                   const SizedBox(width: 8),
                 ],
                 Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
-                if (icon != null && (isCorrect || isWrong)) const SizedBox(width: 28),
+                if (icon != null && (isCorrect || isWrong)) SizedBox(width: iconSize + 6),
               ],
             ),
           ),
