@@ -1,2 +1,2 @@
 const String fractionsAppUrl =
-    'https://dhruvikot.github.io/bilingual-fractions/';
+    'https://fih-fractions.web.app/';
