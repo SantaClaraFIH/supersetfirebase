@@ -65,97 +65,100 @@ class CashierRightPanel extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              questionPanelLabel,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-            ),
-            if (showInstruction) ...[
-              const SizedBox(height: 8),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                questionPanelLabel,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              ),
+              if (showInstruction) ...[
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.blue.shade100),
+                  ),
+                  child: Text(
+                    instructionText,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ] else
+                const SizedBox(height: 8),
               Container(
-                width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.white.withValues(alpha: 0.92),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.blue.shade100),
                 ),
-                child: Text(
-                  instructionText,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                child: Column(
+                  children: [
+                    CashierMetricRow(
+                      label: subtotalLabel,
+                      value: moneyText(subtotalCents),
+                    ),
+                    CashierMetricRow(
+                      label: paidLabel,
+                      value: moneyText(customer.paidCents),
+                    ),
+                    CashierMetricRow(
+                      label: changeDueLabel,
+                      value: moneyText(changeDueCents),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 10),
-            ] else
+              Text(scannedLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: scanned
+                    .map((item) => Chip(label: Text('${item.icon} ${item.name}')))
+                    .toList(),
+              ),
               const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(10),
+              Text(remainingLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: remaining
+                    .map(
+                      (item) => Chip(
+                        backgroundColor: Colors.orange.shade100,
+                        label: Text('${item.icon} ${item.name}'),
+                      ),
+                    )
+                    .toList(),
               ),
-              child: Column(
-                children: [
-                  CashierMetricRow(
-                    label: subtotalLabel,
-                    value: moneyText(subtotalCents),
+              const SizedBox(height: 12),
+              if (isSessionComplete)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  CashierMetricRow(
-                    label: paidLabel,
-                    value: moneyText(customer.paidCents),
-                  ),
-                  CashierMetricRow(
-                    label: changeDueLabel,
-                    value: moneyText(changeDueCents),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(scannedLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: scanned
-                  .map((item) => Chip(label: Text('${item.icon} ${item.name}')))
-                  .toList(),
-            ),
-            const SizedBox(height: 8),
-            Text(remainingLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: remaining
-                  .map(
-                    (item) => Chip(
-                      backgroundColor: Colors.orange.shade100,
-                      label: Text('${item.icon} ${item.name}'),
+                  child: Text(
+                    sessionDoneLabel,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
                     ),
-                  )
-                  .toList(),
-            ),
-            const Spacer(),
-            if (isSessionComplete)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  sessionDoneLabel,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

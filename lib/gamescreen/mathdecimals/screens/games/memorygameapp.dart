@@ -243,7 +243,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
           // Content in a bright contrasting color
           content: Text(
-            "You matched all the pairs!\nPlay the next round?",
+            "You matched all the pairs!\nPlay again?",
             style: TextStyle(
                 color: Colors.lightGreen,
                 fontSize: 18,
@@ -271,7 +271,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                 _generateNewRound();
               },
               child: const Text(
-                "Next Round!",
+                "Restart!",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),

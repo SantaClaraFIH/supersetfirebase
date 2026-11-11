@@ -37,6 +37,10 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _flutterTts = FlutterTts();
   SharedPreferences? _preferences;
+  final ScrollController _mainScrollController = ScrollController();
+  final GlobalKey _storeKey = GlobalKey();
+  final GlobalKey _registerKey = GlobalKey();
+  final GlobalKey _receiptKey = GlobalKey();
 
   final Map<String, String> originalTexts = {
     'title': 'Decimal Cashier',
@@ -193,12 +197,28 @@ class _CashierGameScreenState extends State<CashierGameScreen>
 
   @override
   void dispose() {
+    _mainScrollController.dispose();
     _audioPlayer.dispose();
     _flutterTts.stop();
     _characterController.dispose();
     _changeBounceController.dispose();
     _changeShakeController.dispose();
     super.dispose();
+  }
+
+  void _scrollToSection(GlobalKey key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final targetContext = key.currentContext;
+      if (targetContext != null) {
+        Scrollable.ensureVisible(
+          targetContext,
+          duration: const Duration(milliseconds: 550),
+          curve: Curves.easeInOutCubic,
+          alignment: 0.05,
+        );
+      }
+    });
   }
 
   bool _isChangeCurrentlyIncorrect() {
@@ -358,6 +378,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     }
 
     _prepareCurrentCustomer();
+    _scrollToSection(_storeKey);
   }
 
   void _prepareCurrentCustomer() {
@@ -710,6 +731,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     });
     _updateChangeAnimations();
     _speak(_instructionText(), userInitiated: true);
+    _scrollToSection(_registerKey);
   }
 
   void _applyTokenMomentum(MoneyToken token, Offset velocity) {
@@ -732,6 +754,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       _changeShakeController.value = 0;
       _updateChangeAnimations();
       _saveBestScore();
+      _scrollToSection(_receiptKey);
       await _playSound('MathDecimals/sounds/success.mp3');
       await _speak(_t('correct'), userInitiated: true);
     } else {
@@ -758,6 +781,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       });
       _prepareCurrentCustomer();
       _speak(_instructionText(), userInitiated: true);
+      _scrollToSection(_storeKey);
     } else {
       setState(() {
         _stage = CheckoutStage.sessionComplete;
@@ -765,6 +789,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       _updateChangeAnimations();
       _saveBestScore();
       _speak(_t('sessionDone'), userInitiated: true);
+      _scrollToSection(_receiptKey);
     }
   }
 
@@ -842,15 +867,18 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        badge(_t('score'), '$_score', Colors.indigo),
-        const SizedBox(width: 8),
-        badge(_t('best'), '$_bestScore', Colors.teal),
-        const SizedBox(width: 8),
-        badge(_t('streak'), '$_streak', Colors.deepOrange),
-      ],
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          badge(_t('score'), '$_score', Colors.indigo),
+          const SizedBox(width: 8),
+          badge(_t('best'), '$_bestScore', Colors.teal),
+          const SizedBox(width: 8),
+          badge(_t('streak'), '$_streak', Colors.deepOrange),
+        ],
+      ),
     );
   }
 
@@ -1058,10 +1086,204 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     );
   }
 
+  Widget _buildStickyBottomActionBar() {
+    final bool canOpen = _stage == CheckoutStage.paymentInfo;
+    final bool canCheck = _stage == CheckoutStage.makingChange;
+    final bool canNext = _stage == CheckoutStage.checkedOut;
+    final bool isDone = _stage == CheckoutStage.sessionComplete;
+
+    Widget primaryButton;
+    if (canOpen) {
+      primaryButton = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.indigo.shade600,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: _openRegister,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.point_of_sale_rounded, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '${_t('openRegister')} ➡️',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (canCheck) {
+      primaryButton = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue.shade700,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: _checkChange,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle_rounded, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '${_t('checkChange')} (${_money(_trayTotalCents)} / ${_money(_changeDueCents)})',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (canNext) {
+      primaryButton = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade600,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: _nextCustomer,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_forward_rounded, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '${_t('nextCustomer')} ➡️',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (isDone) {
+      primaryButton = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepOrange,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: _startNewSession,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.replay_rounded, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                _t('restart'),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      final int remaining =
+          _currentCustomer.items.length - _scannedItemIds.length;
+      primaryButton = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.teal.shade700,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: () => _scrollToSection(_storeKey),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.qr_code_scanner_rounded, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                remaining > 0
+                    ? 'Scan Items ($remaining left)'
+                    : 'All Items Scanned',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: Colors.orange.shade200,
+            width: 1.5,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.volume_up_rounded),
+              color: Colors.deepOrange,
+              tooltip: _t('replay'),
+              visualDensity: VisualDensity.compact,
+              onPressed: () => _speak(_instructionText(), userInitiated: true),
+            ),
+            IconButton(
+              icon: const Icon(Icons.lightbulb_outline_rounded),
+              color: Colors.amber.shade800,
+              tooltip: _t('hint'),
+              visualDensity: VisualDensity.compact,
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(_hintText())),
+                );
+              },
+            ),
+            const SizedBox(width: 4),
+            Expanded(child: primaryButton),
+            const SizedBox(width: 4),
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              color: Colors.deepOrange,
+              tooltip: _t('restart'),
+              visualDensity: VisualDensity.compact,
+              onPressed: _startNewSession,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTopInstructionBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(14),
@@ -1070,7 +1292,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       child: Text(
         _instructionText(),
         style: const TextStyle(
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -1082,11 +1304,11 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       builder: (context, constraints) {
         if (constraints.maxWidth < 860) {
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildTopInstructionBanner(),
               const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
+              Center(
                 child: _buildTopBadges(),
               ),
             ],
@@ -1097,10 +1319,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
           children: [
             Expanded(child: _buildTopInstructionBanner()),
             const SizedBox(width: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: _buildTopBadges(),
-            ),
+            _buildTopBadges(),
           ],
         );
       },
@@ -1111,7 +1330,10 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_t('title')),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(_t('title')),
+        ),
         backgroundColor: Colors.deepOrange,
         actions: [
           IconButton(
@@ -1153,50 +1375,95 @@ class _CashierGameScreenState extends State<CashierGameScreen>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                _buildTopStatusRow(),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final bool useStackedLayout = constraints.maxWidth < 980;
-                      if (!useStackedLayout) {
-                        return Row(
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double screenWidth = constraints.maxWidth;
+                final double screenHeight = constraints.maxHeight;
+
+                final bool useStackedLayout =
+                    screenWidth < 980 || screenHeight < 620;
+
+                if (!useStackedLayout) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: screenHeight,
+                        minWidth: screenWidth,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
                           children: [
-                            Expanded(flex: 4, child: _buildStoreScene()),
-                            const SizedBox(width: 10),
-                            Expanded(flex: 5, child: _buildRegisterScene()),
-                            const SizedBox(width: 10),
-                            Expanded(flex: 4, child: _buildRightPanel()),
+                            _buildTopStatusRow(),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: max(420.0, screenHeight - 210.0),
+                              child: Row(
+                                children: [
+                                  Expanded(flex: 4, child: _buildStoreScene()),
+                                  const SizedBox(width: 10),
+                                  Expanded(flex: 5, child: _buildRegisterScene()),
+                                  const SizedBox(width: 10),
+                                  Expanded(flex: 4, child: _buildRightPanel()),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _buildBottomControls(),
                           ],
-                        );
-                      }
+                        ),
+                      ),
+                    ),
+                  );
+                }
 
-                      final double storeHeight =
-                          max(220.0, constraints.maxHeight * 0.34);
-                      final double registerHeight =
-                          max(250.0, constraints.maxHeight * 0.42);
-                      final double rightHeight =
-                          max(210.0, constraints.maxHeight * 0.30);
+                // Stacked layout when screen is reduced:
+                // Whole page is smoothly scrollable with appropriately sized sections.
+                // Sticky bottom action bar stays anchored at the bottom with the dynamic next-step button.
+                final double storeHeight = screenWidth < 430 ? 410.0 : 380.0;
+                final double registerHeight = screenWidth < 430 ? 400.0 : 380.0;
+                final double rightHeight = 330.0;
 
-                      return ListView(
-                        children: [
-                          SizedBox(height: storeHeight, child: _buildStoreScene()),
-                          const SizedBox(height: 10),
-                          SizedBox(height: registerHeight, child: _buildRegisterScene()),
-                          const SizedBox(height: 10),
-                          SizedBox(height: rightHeight, child: _buildRightPanel()),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _buildBottomControls(),
-              ],
+                return Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: _mainScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildTopStatusRow(),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              key: _storeKey,
+                              height: storeHeight,
+                              child: _buildStoreScene(),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              key: _registerKey,
+                              height: registerHeight,
+                              child: _buildRegisterScene(),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              key: _receiptKey,
+                              height: rightHeight,
+                              child: _buildRightPanel(),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
+                    ),
+                    _buildStickyBottomActionBar(),
+                  ],
+                );
+              },
             ),
           ),
         ],

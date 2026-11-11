@@ -15,12 +15,14 @@ class PlaceValueScreen1 extends StatefulWidget {
 class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
   late final List<Map<String, String>> _initialQuestions;
   late SharedPreferences _preferences;
+  late List<String> _shuffledOptions;
 
   @override
   void initState() {
     super.initState();
     _initialQuestions = List<Map<String, String>>.from(questions);
     questions.shuffle(Random());
+    _shuffledOptions = [...extraOptions]..shuffle(Random());
     _loadBestScore();
   }
 
@@ -176,18 +178,23 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    bool shouldRotate = screenWidth < 1200;
-
     return Scaffold(
       appBar: AppBar(
-        title: RichText(
-            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
-          const TextSpan(text: "Match it! "),
-          TextSpan(
-              text: " Score: $score",
-              style: TextStyle(fontWeight: FontWeight.bold))
-        ])),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 22, color: Colors.white),
+              children: [
+                const TextSpan(text: "Match it! "),
+                TextSpan(
+                  text: " Score: $score",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
@@ -195,11 +202,13 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
         backgroundColor: Colors.green,
         centerTitle: true,
         actions: [
-          Text(
-            "Best Score: $bestScore",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Center(
+            child: Text(
+              "Best: $bestScore",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-          Padding(padding: const EdgeInsets.all(5.0)),
+          const SizedBox(width: 4),
           IconButton(
             onPressed: () {
               _navigateToHome();
@@ -217,143 +226,220 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
           Positioned.fill(
             child: Image.asset(
               'assets/MathDecimals/b2.png',
-              // screenWidth > 1200
-              //     ? 'assets/MathDecimals/matchitbackground.png'
-              //     : 'assets/MathDecimals/l2.png',
               fit: BoxFit.cover,
             ),
           ),
-          _buildGameContent(),
-          // shouldRotate
-          //     ? RotatedBox(
-          //         quarterTurns: 3, // Rotate the screen by 90 degrees
-          //         child: _buildGameContent(),
-          //       )
-          //     : _buildGameContent(),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                      minWidth: constraints.maxWidth,
+                    ),
+                    child: _buildGameContent(constraints),
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildGameContent() {
+  Widget _buildGameContent(BoxConstraints constraints) {
+    final double screenWidth = constraints.maxWidth;
+    final double screenHeight = constraints.maxHeight;
+
+    final bool isSmall = screenWidth < 700 || screenHeight < 650;
+    final bool isVerySmall = screenWidth < 450 || screenHeight < 500;
+
     if (questions.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Great job! All questions completed!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  questions.addAll(_initialQuestions);
-                  questions.shuffle(Random());
-                  score = 0;
-                  draggedItems.clear();
-                  feedback.clear();
-                });
-              },
-              child: const Text('Restart Game'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Great job! All questions completed!',
+                style: TextStyle(
+                  fontSize: isSmall ? 20 : 24,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    questions.addAll(_initialQuestions);
+                    questions.shuffle(Random());
+                    score = 0;
+                    draggedItems.clear();
+                    feedback.clear();
+                    _shuffledOptions = [...extraOptions]..shuffle(Random());
+                  });
+                },
+                child: const Text('Restart Game'),
+              ),
+            ],
+          ),
         ),
       );
     }
-    return SizedBox.expand(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              translated
-                  ? translatedTexts['heading'] ?? originalTexts['heading']!
-                  : originalTexts['heading']!,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+
+    final double headingFontSize = isVerySmall ? 15 : (isSmall ? 17 : 20);
+    final double numberFontSize = isVerySmall ? 26 : (isSmall ? 32 : 40);
+
+    final int numDigits = questions.first.keys.length;
+    final double targetSpacing = isVerySmall ? 4.0 : (isSmall ? 6.0 : 8.0);
+    final double horizontalPadding = isVerySmall ? 8.0 : (isSmall ? 12.0 : 16.0);
+    final double availableWidth = screenWidth - (horizontalPadding * 2);
+    final double calculatedTargetWidth = numDigits > 0
+        ? ((availableWidth - ((numDigits - 1) * targetSpacing)) / numDigits)
+        : 100.0;
+    final double targetWidth =
+        calculatedTargetWidth.clamp(isVerySmall ? 42.0 : 50.0, 100.0);
+    final double targetHeight = isVerySmall ? 36.0 : (isSmall ? 42.0 : 50.0);
+    final double targetFontSize = isVerySmall ? 11.0 : (isSmall ? 13.0 : 15.0);
+
+    final double optionFontSize = isVerySmall ? 12.0 : (isSmall ? 13.0 : 15.0);
+    final EdgeInsets optionPadding = isVerySmall
+        ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+        : (isSmall
+            ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
+            : const EdgeInsets.symmetric(horizontal: 12, vertical: 8));
+    final double optionSpacing = isVerySmall ? 6.0 : (isSmall ? 8.0 : 10.0);
+    final double verticalGap = isVerySmall ? 8.0 : (isSmall ? 12.0 : 20.0);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: isVerySmall ? 8.0 : 16.0,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            translated
+                ? translatedTexts['heading'] ?? originalTexts['heading']!
+                : originalTexts['heading']!,
+            style: TextStyle(
+              fontSize: headingFontSize,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 20),
-            Wrap(
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: verticalGap),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: questions.first.keys.map((number) {
                 int colorIndex = questions.first.keys.toList().indexOf(number) %
                     colors.length;
-                return Column(
-                  children: [
-                    _buildColoredNumber(number, colors[colorIndex]),
-                    const SizedBox(height: 10),
-                    _buildDragTarget(number),
-                  ],
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: targetSpacing / 2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildColoredNumber(
+                          number, colors[colorIndex], numberFontSize),
+                      SizedBox(height: isVerySmall ? 4 : 8),
+                      _buildDragTarget(
+                          number, targetWidth, targetHeight, targetFontSize),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
-            // const SizedBox(height: 40),
-            // _buildFeedbackSection(),
-            const SizedBox(height: 20),
-            _buildDraggableOptions(),
-          ],
-        ),
+          ),
+          SizedBox(height: verticalGap * 1.2),
+          _buildDraggableOptions(optionFontSize, optionPadding, optionSpacing),
+        ],
       ),
     );
   }
 
-  Widget _buildDraggableOptions() {
-    final shuffledOptions = [...extraOptions]..shuffle(Random());
+  Widget _buildDraggableOptions(
+    double fontSize,
+    EdgeInsets padding,
+    double spacing,
+  ) {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: spacing,
+      runSpacing: spacing,
       alignment: WrapAlignment.center,
-      children: shuffledOptions.map((value) => _buildDraggable(value)).toList(),
+      children: _shuffledOptions
+          .map((value) => _buildDraggable(value, fontSize, padding))
+          .toList(),
     );
   }
 
-  Widget _buildColoredNumber(String number, Color color) {
+  Widget _buildColoredNumber(String number, Color color, double fontSize) {
     return Text(
       number,
       style: TextStyle(
-        fontSize: 40,
+        fontSize: fontSize,
         fontWeight: FontWeight.bold,
         color: color,
       ),
     );
   }
 
-  Widget _buildDraggable(String value) {
+  Widget _buildDraggable(String value, double fontSize, EdgeInsets padding) {
     return Draggable<String>(
       data: value,
       feedback: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(6),
         child: Container(
-          padding: const EdgeInsets.all(8),
-          color: Colors.teal[300],
+          padding: padding,
+          decoration: BoxDecoration(
+            color: Colors.teal[300],
+            borderRadius: BorderRadius.circular(6),
+          ),
           child: Text(
             value,
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: fontSize, color: Colors.white),
           ),
         ),
       ),
       childWhenDragging: Container(
-        padding: const EdgeInsets.all(8),
-        color: const Color.fromARGB(255, 147, 212, 206),
+        padding: padding,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 147, 212, 206),
+          borderRadius: BorderRadius.circular(6),
+        ),
         child: Text(
           value,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
+          style: TextStyle(fontSize: fontSize, color: Colors.grey),
         ),
       ),
       child: Container(
-        padding: const EdgeInsets.all(8),
-        color: const Color.fromARGB(255, 147, 212, 206),
+        padding: padding,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 147, 212, 206),
+          borderRadius: BorderRadius.circular(6),
+        ),
         child: Text(
           value,
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: fontSize),
         ),
       ),
     );
   }
 
-  Widget _buildDragTarget(String key) {
+  Widget _buildDragTarget(
+      String key, double width, double height, double fontSize) {
     return DragTarget<String>(
       onAcceptWithDetails: (value) {
         setState(() {
@@ -376,19 +462,22 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
             score += 10;
             _saveBestScore(score);
             Future.delayed(const Duration(seconds: 1), () {
-              setState(() {
-                questions.removeAt(0);
-                draggedItems.clear();
-                feedback.clear();
-              });
+              if (mounted) {
+                setState(() {
+                  questions.removeAt(0);
+                  draggedItems.clear();
+                  feedback.clear();
+                  _shuffledOptions = [...extraOptions]..shuffle(Random());
+                });
+              }
             });
           }
         });
       },
       builder: (context, candidateData, rejectedData) {
         return Container(
-          width: 100,
-          height: 50,
+          width: width,
+          height: height,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(8),
@@ -396,14 +485,26 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
           ),
           alignment: Alignment.center,
           child: draggedItems[key] != null
-              ? Text(
-                  draggedItems[key]!,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      draggedItems[key]!,
+                      style: TextStyle(
+                          fontSize: fontSize, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 )
-              : const Text(
-                  'Drop here',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Drop here',
+                      style: TextStyle(fontSize: fontSize, color: Colors.grey),
+                    ),
+                  ),
                 ),
         );
       },

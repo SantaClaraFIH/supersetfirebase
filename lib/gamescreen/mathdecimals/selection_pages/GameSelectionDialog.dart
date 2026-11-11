@@ -19,76 +19,102 @@ class GameSelectionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
-    return Dialog(
+    return Scaffold(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.zero, // Remove default padding
-      child: SizedBox(
-        width: screenSize.width,
-        height: screenSize.height,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/MathDecimals/play.jpg',
-                fit: BoxFit.cover,
-              ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/MathDecimals/play.jpg',
+              fit: BoxFit.cover,
             ),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 10,
-                      spreadRadius: 2,
+          ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Choose a Game',
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 30),
-                    _buildGameButton(context, '🃏 Match the Tiles',
-                        MemoryGameScreen(), Colors.green),
-                    _buildGameButton(context, '🐦 Lizzie the Bird',
-                        LizzieTheBirdGame(), Colors.blue),
-                    _buildGameButton(context, '🎯 Place Value Puzzle',
-                        PlaceValueScreen1(), Colors.orange),
-                    _buildGameButton(context, '🎤 Choose It',
-                        ChooseItGameScreen(), Colors.purple),
-                    _buildGameButton(context, '🎈 Decimal Pop!',
-                        const DecimalPopGame(), Colors.teal),
-                    _buildGameButton(context, '🛒 Decimal Cashier',
-                        const CashierGameScreen(), Colors.deepOrange),
-                    _buildGameButton(context, '🍳 Decimal Chef',
-                        const ChefGameScreen(), Colors.orange),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
-                      child: const Text(
-                        'Home',
-                        style: TextStyle(fontSize: 18, color: Colors.red),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 24.0,
+                        ),
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 380),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Center(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Choose a Game',
+                                    style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildGameButton(context, '🃏 Match the Tiles',
+                                  MemoryGameScreen(), Colors.green),
+                              _buildGameButton(context, '🐦 Lizzie the Bird',
+                                  LizzieTheBirdGame(), Colors.blue),
+                              _buildGameButton(context, '🎯 Place Value Puzzle',
+                                  PlaceValueScreen1(), Colors.orange),
+                              _buildGameButton(context, '🎤 Choose It',
+                                  ChooseItGameScreen(), Colors.purple),
+                              _buildGameButton(context, '🎈 Decimal Pop!',
+                                  const DecimalPopGame(), Colors.teal),
+                              _buildGameButton(context, '🛒 Decimal Cashier',
+                                  const CashierGameScreen(), Colors.deepOrange),
+                              _buildGameButton(context, '🍳 Decimal Chef',
+                                  const ChefGameScreen(), Colors.orange),
+                              const SizedBox(height: 16),
+                              Center(
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.popUntil(
+                                        context, (route) => route.isFirst);
+                                  },
+                                  child: const Text(
+                                    'Home',
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.red),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -107,7 +133,14 @@ class GameSelectionDialog extends StatelessWidget {
           ),
         ),
         onPressed: () => _navigateToGame(context, screen),
-        child: Text(title, style: const TextStyle(fontSize: 18)),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }

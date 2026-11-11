@@ -156,12 +156,12 @@ class CashierStorePanel extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 62, 12, 12),
+                padding: EdgeInsets.fromLTRB(12, isNarrow ? 52.0 : 60.0, 12, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(isNarrow ? 8.0 : 10.0),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(12),
@@ -284,7 +284,7 @@ class CashierStorePanel extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      height: 16,
+                      height: isNarrow ? 12.0 : 16.0,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF8E6F5C), Color(0xFF6E5648)],
@@ -292,48 +292,87 @@ class CashierStorePanel extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Text(
                       basketLabel,
                       style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                     ),
                     const SizedBox(height: 6),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: customer.items.map((item) {
-                            final bool scanned = scannedItemIds.contains(item.id);
-                            return Draggable<StoreItem>(
-                              data: item,
-                              feedback: Material(
-                                color: Colors.transparent,
-                                child: _buildItemCard(
-                                  item,
-                                  scanned: scanned,
-                                  compact: true,
-                                  forcedWidth: min(140, cardWidth),
+                    if (constraints.hasBoundedHeight && constraints.maxHeight >= 300)
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: customer.items.map((item) {
+                              final bool scanned = scannedItemIds.contains(item.id);
+                              return Draggable<StoreItem>(
+                                data: item,
+                                feedback: Material(
+                                  color: Colors.transparent,
+                                  child: _buildItemCard(
+                                    item,
+                                    scanned: scanned,
+                                    compact: true,
+                                    forcedWidth: min(140, cardWidth),
+                                  ),
                                 ),
-                              ),
-                              childWhenDragging: Opacity(
-                                opacity: 0.35,
+                                childWhenDragging: Opacity(
+                                  opacity: 0.35,
+                                  child: _buildItemCard(
+                                    item,
+                                    scanned: scanned,
+                                    forcedWidth: cardWidth,
+                                  ),
+                                ),
                                 child: _buildItemCard(
                                   item,
                                   scanned: scanned,
                                   forcedWidth: cardWidth,
                                 ),
-                              ),
-                              child: _buildItemCard(
-                                item,
-                                scanned: scanned,
-                                forcedWidth: cardWidth,
-                              ),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      )
+                    else
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 140),
+                        child: SingleChildScrollView(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: customer.items.map((item) {
+                              final bool scanned = scannedItemIds.contains(item.id);
+                              return Draggable<StoreItem>(
+                                data: item,
+                                feedback: Material(
+                                  color: Colors.transparent,
+                                  child: _buildItemCard(
+                                    item,
+                                    scanned: scanned,
+                                    compact: true,
+                                    forcedWidth: min(140, cardWidth),
+                                  ),
+                                ),
+                                childWhenDragging: Opacity(
+                                  opacity: 0.35,
+                                  child: _buildItemCard(
+                                    item,
+                                    scanned: scanned,
+                                    forcedWidth: cardWidth,
+                                  ),
+                                ),
+                                child: _buildItemCard(
+                                  item,
+                                  scanned: scanned,
+                                  forcedWidth: cardWidth,
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 8),
                     DragTarget<StoreItem>(
                       onWillAcceptWithDetails: (_) => isScanningStage,
@@ -343,7 +382,7 @@ class CashierStorePanel extends StatelessWidget {
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(isNarrow ? 8.0 : 12.0),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: highlighted

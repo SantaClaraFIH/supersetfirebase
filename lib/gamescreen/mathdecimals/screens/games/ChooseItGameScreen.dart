@@ -217,6 +217,16 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (questions.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          title: const Text("Choose It Game!"),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     String question = questions[currentQuestionIndex]['number'].toString();
     String correctAnswer = questions[currentQuestionIndex]['description'];
     final screenWidth = MediaQuery.of(context).size.width;
@@ -224,24 +234,34 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: RichText(
-            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
-          const TextSpan(text: "Choose It Game! "),
-          TextSpan(
-              text: "Score: $score",
-              style: TextStyle(fontWeight: FontWeight.bold))
-        ])),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 22, color: Colors.white),
+              children: [
+                const TextSpan(text: "Choose It Game! "),
+                TextSpan(
+                  text: "Score: $score",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
         ),
         actions: [
-          Text(
-            "Best Score: $bestScore",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Center(
+            child: Text(
+              "Best: $bestScore",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-          Padding(padding: const EdgeInsets.all(5.0)),
+          const SizedBox(width: 4),
           IconButton(
             onPressed: _navigateToHome,
             icon: const Icon(Icons.home),
@@ -259,162 +279,221 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
               screenWidth > 1200
                   ? 'assets/MathDecimals/matchitbackground.png'
                   : 'assets/MathDecimals/top2.png',
-              fit: screenWidth > 1200 ? BoxFit.cover : BoxFit.cover,
+              fit: BoxFit.cover,
             ),
           ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Expanded(
-                      Text(
-                        translated
-                            ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
-                            : '${originalTexts['heading']} $question?',
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                      minWidth: constraints.maxWidth,
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: constraints.maxWidth < 450 ? 12.0 : 16.0,
+                          vertical: constraints.maxHeight < 550 ? 12.0 : 20.0,
                         ),
-                        textAlign: TextAlign.center,
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 550),
+                          child: _buildGameBody(
+                              constraints, question, correctAnswer),
+                        ),
                       ),
-
-                      if (selectedAnswer.isNotEmpty)
-                        Padding(
-                          padding:
-                              EdgeInsets.only(left: 8.0), // Added padding here
-                          child: IconButton(
-                            onPressed: () => _speak(correctAnswer),
-                            icon: const Icon(Icons.volume_up),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  for (var option in questions[currentQuestionIndex]['options'])
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: ElevatedButton(
-                        onPressed: () => checkAnswer(option),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedAnswer.isEmpty
-                              ? Colors.purple
-                              : option == correctAnswer
-                                  ? Colors.green
-                                  : selectedAnswer != correctAnswer &&
-                                          option == selectedAnswer
-                                      ? Colors.red
-                                      : Colors.grey,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 20),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: Text(option),
-                      ),
-                    ),
-                  const SizedBox(height: 20),
-                  if (selectedAnswer.isNotEmpty)
-                    Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              if (currentQuestionIndex < questions.length - 1) {
-                                currentQuestionIndex++;
-                                selectedAnswer = '';
-                              } else {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      backgroundColor: Colors.white,
-                                      title: const Text(
-                                        "  Game Over  ",
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      content: Text(
-                                        'Your score: $score/${(questions.length) * 10}',
-                                        style: const TextStyle(
-                                            color: Colors.lightGreen,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      actionsAlignment:
-                                          MainAxisAlignment.center,
-                                      actions: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.lightGreen,
-                                            foregroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
-                                              vertical: 12,
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              score = 0;
-                                              currentQuestionIndex = 0;
-                                              selectedAnswer = '';
-                                              Navigator.of(context).pop();
-                                              _shuffleQuestions();
-                                            });
-                                          },
-                                          child: const Text(
-                                            "Restart",
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Next question'),
-                        )
-                      ],
-                    ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildGameBody(
+      BoxConstraints constraints, String question, String correctAnswer) {
+    final double screenWidth = constraints.maxWidth;
+    final double screenHeight = constraints.maxHeight;
+
+    final bool isSmall = screenWidth < 600 || screenHeight < 650;
+    final bool isVerySmall = screenWidth < 400 || screenHeight < 500;
+
+    final double headingFontSize = isVerySmall ? 16 : (isSmall ? 20 : 26);
+    final double optionFontSize = isVerySmall ? 12 : (isSmall ? 14 : 16);
+    final double optionPaddingV = isVerySmall ? 8 : (isSmall ? 10 : 13);
+    final double optionPaddingH = isVerySmall ? 10 : (isSmall ? 14 : 20);
+    final double optionVerticalMargin = isVerySmall ? 4 : (isSmall ? 6 : 8);
+    final double verticalGap = isVerySmall ? 10 : (isSmall ? 14 : 20);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                translated
+                    ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
+                    : '${originalTexts['heading']} $question?',
+                style: TextStyle(
+                  fontSize: headingFontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            if (selectedAnswer.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: IconButton(
+                  onPressed: () => _speak(correctAnswer),
+                  icon: Icon(Icons.volume_up, size: isVerySmall ? 20 : 24),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.all(isVerySmall ? 6 : 8),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        SizedBox(height: verticalGap),
+        for (var option in questions[currentQuestionIndex]['options'])
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: optionVerticalMargin),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => checkAnswer(option),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedAnswer.isEmpty
+                      ? Colors.purple
+                      : option == correctAnswer
+                          ? Colors.green
+                          : selectedAnswer != correctAnswer &&
+                                  option == selectedAnswer
+                              ? Colors.red
+                              : Colors.grey,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    vertical: optionPaddingV,
+                    horizontal: optionPaddingH,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: Text(
+                  option,
+                  style: TextStyle(
+                    fontSize: optionFontSize,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        if (selectedAnswer.isNotEmpty) ...[
+          SizedBox(height: verticalGap),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                if (currentQuestionIndex < questions.length - 1) {
+                  currentQuestionIndex++;
+                  selectedAnswer = '';
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        backgroundColor: Colors.white,
+                        title: const Text(
+                          "  Game Over  ",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        content: Text(
+                          'Your score: $score/${(questions.length) * 10}',
+                          style: const TextStyle(
+                              color: Colors.lightGreen,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                        actionsAlignment: MainAxisAlignment.center,
+                        actions: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.lightGreen,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                score = 0;
+                                currentQuestionIndex = 0;
+                                selectedAnswer = '';
+                                Navigator.of(context).pop();
+                                _shuffleQuestions();
+                              });
+                            },
+                            child: const Text(
+                              "Restart",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: isVerySmall ? 16 : 24,
+                vertical: isVerySmall ? 8 : 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Next question',
+              style: TextStyle(
+                fontSize: optionFontSize,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
